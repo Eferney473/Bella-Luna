@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "845867207640",
+    "project_id": "bellaluna-2167a",
+    "storage_bucket": "bellaluna-2167a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845867207640:android:b20818b65cb70457d440ad",
+        "android_client_info": {
+          "package_name": "com.bellaluna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRUvZSDOZbi88D6CNgqhs0EDSKn-V_az4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
