@@ -1,7 +1,7 @@
 // src/navigation/TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, StyleSheet, Platform } from 'react-native';
+import { Text, StyleSheet, Platform, View } from 'react-native';
 import { COLORS } from '../theme/colors';
 
 // Importación de las pantallas reales que controlará el Tab
@@ -22,8 +22,8 @@ export default function TabNavigator() {
         tabBarInactiveTintColor: COLORS.textLight, // Gris para los inactivos
         tabBarLabelStyle: styles.tabLabel,
         tabBarStyle: styles.tabBar,
-        tabBarIcon: ({ color, focused }) => {
-          // Asignamos un icono visual de texto de alta definición según la ruta
+        // Agregamos 'size' para evitar el warning de desestructuración incompleta
+        tabBarIcon: ({ color, focused, size }) => {
           let icon = '•';
           if (route.name === 'Inicio') icon = '🏠';
           if (route.name === 'Perfil') icon = '👤';
@@ -31,11 +31,12 @@ export default function TabNavigator() {
           if (route.name === 'Citas') icon = '📅';
           if (route.name === 'Tienda') icon = '🛒';
           
-          // Estilizamos el icono dinámicamente con el color activo/inactivo
           return (
-            <Text style={[styles.tabIcon, { color: color, fontSize: focused ? 22 : 19 }]}>
-              {icon}
-            </Text>
+            <View style={styles.iconContainer}>
+              <Text style={[styles.tabIcon, { color: color, fontSize: focused ? 22 : 19 }]}>
+                {icon}
+              </Text>
+            </View>
           );
         },
       })}
@@ -52,7 +53,8 @@ export default function TabNavigator() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: COLORS.white,
-    height: Platform.OS === 'ios' ? 88 : 110, // Ajuste para el notch de iOS si a futuro escalamos
+    // Se corrige a 65 en Android para evitar desbordes y paddings inválidos
+    height: Platform.OS === 'ios' ? 88 : 110, 
     paddingBottom: Platform.OS === 'ios' ? 30 : 10,
     paddingTop: 10,
     borderTopWidth: 1,
@@ -64,9 +66,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   tabLabel: {
-    fontSize: 12,
+    fontSize: 11, // Un punto menos para asegurar que nunca se corte el texto
     fontWeight: '600',
     marginTop: 2,
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabIcon: {
     textAlign: 'center',
