@@ -14,7 +14,7 @@ import { COLORS } from '../../theme/colors';
 
 const { width } = Dimensions.get('window');
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
   // Datos simulados para las listas (luego vendrán de Firestore)
   const servicios = [
     { id: '1', nombre: 'Guardería', img: require('../../assets/guarderia1.jpeg') },
@@ -69,7 +69,11 @@ export default function HomeScreen() {
         
         <View style={styles.horizontalRow}>
           {servicios.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.serviceCard}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.serviceCard}
+              onPress={() => item.nombre === 'Guardería' && navigation.navigate('ReservarServicio')}
+            >
               <View style={styles.imageContainer}>
                 <Image source={item.img} style={styles.cardImage} />
               </View>

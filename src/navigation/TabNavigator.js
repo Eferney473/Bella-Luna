@@ -1,4 +1,3 @@
-// src/navigation/TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, StyleSheet, Platform, View } from 'react-native';
@@ -54,8 +53,8 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: COLORS.white,
     // Se corrige a 65 en Android para evitar desbordes y paddings inválidos
-    height: Platform.OS === 'ios' ? 88 : 110, 
-    paddingBottom: Platform.OS === 'ios' ? 30 : 10,
+    height: Platform.OS === 'ios' ? 100 : 110, 
+    paddingBottom: Platform.OS === 'ios' ? 30 : 18,
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
