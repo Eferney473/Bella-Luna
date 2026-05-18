@@ -1,87 +1,194 @@
-// src/screens/appointments/AppointmentsScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
   SafeAreaView, 
-  StyleSheet, 
   StatusBar, 
   FlatList, 
-  TouchableOpacity 
+  TouchableOpacity, 
+  StyleSheet, 
+  Dimensions,
+  Platform
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
-import { subscribeToUserBookings } from '../../database/bookingService';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const USER_ID_TEST = "user_ana_123"; // ID simulado
+const { width } = Dimensions.get('window');
 
-export default function AppointmentsScreen() {
-  const [bookings, setBookings] = useState([]);
+export default function AppointmentsScreen({ navigation }) {
+  const [activeTab, setActiveTab] = useState('proximas');
 
-  useEffect(() => {
-    // Conexión en tiempo real a Firebase Firestore
-    const unsubscribe = subscribeToUserBookings(USER_ID_TEST, (list) => {
-      if (list.length === 0) {
-        // Datos de prueba locales por si la base de datos está vacía al inicio
-        setBookings([
-          { id: '1', servicio: 'Guardería', mascota: 'Luna', fecha: '14/05/2026', horario: '08:00 AM', precio: 45000, status: 'Completada' },
-          { id: '2', servicio: 'Spa & Baño', mascota: 'Luna', fecha: '10/05/2026', horario: '02:30 PM', precio: 35000, status: 'Completada' },
-          { id: '3', servicio: 'Paseo Programado', mascota: 'Luna', fecha: '02/05/2026', horario: '10:00 AM', precio: 20000, status: 'Completada' }
-        ]);
-      } else {
-        setBookings(list);
-      }
-    });
+  const citasProximas = [
+    {
+      id: '1',
+      tipo: 'servicio',
+      servicio: 'Spa & Estética',
+      mascota: 'Luna',
+      fecha: '20 Mayo',
+      hora: '10:00 AM',
+      estado: 'Confirmada',
+      icon: 'sparkles-outline',
+    },
+    {
+      id: '2',
+      tipo: 'servicio',
+      servicio: 'Guardería por Día',
+      mascota: 'Luna',
+      fecha: '25 Mayo',
+      hora: '08:00 AM',
+      estado: 'Pendiente',
+      icon: 'home-outline',
+    },
+  ];
 
-    return () => unsubscribe();
-  }, []);
+  const historialActividad = [
+    {
+      id: '3',
+      tipo: 'servicio',
+      servicio: 'Paseo Vespertino',
+      mascota: 'Luna',
+      fecha: '15 Mayo',
+      hora: '04:00 PM',
+      estado: 'Completado',
+      icon: 'walk-outline',
+    },
+    {
+      id: '4',
+      tipo: 'compra',
+      servicio: 'Alimento Premium & Juguete',
+      mascota: null,
+      fecha: '12 Mayo',
+      hora: '11:30 AM',
+      estado: 'Entregado',
+      icon: 'bag-handle-outline',
+      total: '$45.000'
+    },
+  ];
 
-  const renderBookingItem = ({ item }) => (
-    <View style={styles.bookingCard}>
-      <View style={styles.cardHeader}>
-        <View style={styles.serviceBadge}>
-          <Text style={styles.serviceText}>
-            {item.servicio === 'Guardería' ? '🏠' : item.servicio === 'Spa & Baño' ? '🧼' : '🐾'} {item.servicio}
-          </Text>
+  const getStatusStyle = (item) => {
+    if (item.tipo === 'compra') {
+      return { bg: '#EBF5FF', text: '#1E40AF' }; // Azul premium para compras
+    }
+    switch (item.estado) {
+      case 'Confirmada':
+        return { bg: '#E6F4EA', text: '#137333' }; // Verde
+      case 'Pendiente':
+        return { bg: '#FFF7ED', text: '#C2410C' }; // Naranja/Amarillo moderno
+      case 'Completado':
+      default:
+        return { bg: '#F3F4F6', text: '#4B5563' }; // Gris neutro
+    }
+  };
+
+  const renderItemCard = ({ item }) => {
+    const statusColor = getStatusStyle(item);
+
+    return (
+      <View style={styles.appointmentCard}>
+        {/* Bloque Izquierdo Estilizado (Fecha) */}
+        <View style={styles.dateBlock}>
+          <Text style={styles.dateTextDay}>{item.fecha.split(' ')[0]}</Text>
+          <Text style={styles.dateTextMonth}>{item.fecha.split(' ')[1].toUpperCase()}</Text>
         </View>
-        {/* Badge de estado usando color Menta (Primary) */}
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>{item.status || 'Completada'}</Text>
+
+        {/* Bloque Central con Jerarquía de Textos */}
+        <View style={styles.detailsBlock}>
+          <View style={styles.serviceTitleRow}>
+            <View style={[styles.iconWrapper, { backgroundColor: item.tipo === 'compra' ? '#F0F6FF' : '#FAF5FF' }]}>
+              <Ionicons 
+                name={item.icon} 
+                size={16} 
+                color={item.tipo === 'compra' ? '#2563EB' : COLORS.ciruela} 
+              />
+            </View>
+            <Text style={styles.serviceName} numberOfLines={1}>{item.servicio}</Text>
+          </View>
+          
+          {item.tipo === 'servicio' ? (
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Mascota:</Text>
+              <Text style={styles.metaValue}>{item.mascota}</Text>
+            </View>
+          ) : (
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Monto:</Text>
+              <Text style={[styles.metaValue, styles.priceValue]}>{item.total}</Text>
+            </View>
+          )}
+          
+          <View style={styles.timeRow}>
+            <Ionicons name="time-outline" size={13} color="#9CA3AF" style={{ marginRight: 4 }} />
+            <Text style={styles.timeText}>{item.hora}</Text>
+          </View>
+        </View>
+
+        {/* Bloque Derecho: Badge de Estado tipo Píldora */}
+        <View style={styles.statusBlock}>
+          <View style={[styles.statusBadge, { backgroundColor: statusColor.bg }]}>
+            <Text style={[styles.statusText, { color: statusColor.text }]}>
+              {item.tipo === 'compra' ? 'Compra' : item.estado}
+            </Text>
+          </View>
         </View>
       </View>
-
-      <View style={styles.cardBody}>
-        <Text style={styles.infoLine}>
-          <Text style={styles.label}>Mascota: </Text>{item.mascota}
-        </Text>
-        <Text style={styles.infoLine}>
-          <Text style={styles.label}>Fecha: </Text>{item.fecha}  |  <Text style={styles.label}>Hora: </Text>{item.horario}
-        </Text>
-      </View>
-
-      <View style={styles.cardFooter}>
-        <Text style={styles.totalLabel}>Total abonado:</Text>
-        <Text style={styles.totalPrice}>${item.precio.toLocaleString('es-CO')}</Text>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9F9F6" />
       
+      {/* --- HEADER --- */}
       <View style={styles.header}>
-        <Text style={styles.title}>Mis Citas</Text>
-        <Text style={styles.subtitle}>Historial de servicios tomados</Text>
+        <Text style={styles.headerTitle}>Actividad y Citas</Text>
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={() => navigation.navigate('ReservarServicio')}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={24} color={COLORS.white} />
+        </TouchableOpacity>
       </View>
 
+      {/* --- TAB SELECTOR DISEÑO TIPO PÍLDORA FLOTANTE --- */}
+      <View style={styles.tabWrapper}>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity 
+            style={[styles.tab, activeTab === 'proximas' && styles.activeTab]}
+            onPress={() => setActiveTab('proximas')}
+            activeOpacity={0.9}
+          >
+            <Text style={[styles.tabText, activeTab === 'proximas' && styles.activeTabText]}>
+              Próximas Citas
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.tab, activeTab === 'historial' && styles.activeTab]}
+            onPress={() => setActiveTab('historial')}
+            activeOpacity={0.9}
+          >
+            <Text style={[styles.tabText, activeTab === 'historial' && styles.activeTabText]}>
+              Historial
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* --- LISTADO --- */}
       <FlatList
-        data={bookings}
-        keyExtractor={item => item.id}
-        renderItem={renderBookingItem}
-        contentContainerStyle={styles.listContent}
+        data={activeTab === 'proximas' ? citasProximas : historialActividad}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItemCard}
+        contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No registras ningún servicio agendado todavía.</Text>
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="calendar-outline" size={32} color="#9CA3AF" />
+            </View>
+            <Text style={styles.emptyText}>No hay registros para mostrar aquí</Text>
+          </View>
         }
       />
     </SafeAreaView>
@@ -89,54 +196,153 @@ export default function AppointmentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.white },
-  header: { paddingHorizontal: 20, paddingTop: 16, marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginTop: 50 },
-  subtitle: { fontSize: 14, color: COLORS.textLight, marginTop: 4 },
-  listContent: { paddingHorizontal: 20, paddingBottom: 24 },
-
-  // Tarjeta de Historial
-  bookingCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  safeArea: { flex: 1, backgroundColor: '#F9F9F6' },
+  
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 70,
+    paddingHorizontal: 20,
+    marginTop:60,
+    marginBottom: 30,
+    backgroundColor: '#F9F9F6',
+  },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela },
+  addButton: {
+    backgroundColor: COLORS.primary || '#149284',
+    width: 42,
+    height: 42,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+
+  // Contenedor de Píldora Selector de pestañas (Estilo moderno)
+  tabWrapper: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    marginTop: 4,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#ECECE7',
+    borderRadius: 25,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 21,
+  },
+  activeTab: {
+    backgroundColor: COLORS.oro || '#FFFFFF',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 2,
   },
-  cardHeader: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.surface,
-    paddingBottom: 10,
-    marginBottom: 12
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#7C7C75',
   },
-  serviceBadge: { backgroundColor: COLORS.surface, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  serviceText: { fontSize: 13, fontWeight: 'bold', color: COLORS.textDark },
-  statusBadge: { backgroundColor: COLORS.primaryLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  statusText: { fontSize: 11, fontWeight: 'bold', color: COLORS.primary },
+  activeTabText: {
+    color: COLORS.ciruela || '#1F2937',
+    fontWeight: 'bold',
+  },
 
-  // Cuerpo de la tarjeta
-  cardBody: { marginBottom: 12 },
-  infoLine: { fontSize: 14, color: COLORS.textMedium, marginBottom: 4 },
-  label: { fontWeight: '600', color: COLORS.textDark },
+  listContainer: { paddingHorizontal: 16, paddingBottom: 40 },
 
-  // Footer de la tarjeta
-  cardFooter: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+  // Tarjeta de Cita Avanzada (Efecto Elevación Premium)
+  appointmentCard: {
+    backgroundColor: COLORS.white || '#FFFFFF',
+    borderRadius: 20,
+    flexDirection: 'row',
+    padding: 16,
+    marginBottom: 16,
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: COLORS.surface,
-    paddingTop: 10
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
-  totalLabel: { fontSize: 13, color: COLORS.oro, fontWeight: 'bold' },
-  totalPrice: { fontSize: 16, fontWeight: 'bold', color: COLORS.ciruela }
+  dateBlock: {
+    backgroundColor: '#FAF9F5',
+    borderWidth: 1,
+    borderColor: '#ECECE7',
+    borderRadius: 16,
+    width: 64,
+    height: 68,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  dateTextDay: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela },
+  dateTextMonth: { fontSize: 10, fontWeight: '800', color: '#9CA3AF', marginTop: 2, letterSpacing: 0.5 },
+  
+  detailsBlock: { flex: 1, justifyContent: 'center' },
+  serviceTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  iconWrapper: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  serviceName: { fontSize: 16, fontWeight: 'bold', color: '#1F2937', flex: 1 },
+  
+  metaRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  metaLabel: { fontSize: 13, color: '#6B7280', marginRight: 4 },
+  metaValue: { fontSize: 13, fontWeight: '600', color: '#374151' },
+  priceValue: { color: '#10B981' }, // Color verde éxito para el precio
+
+  timeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+  timeText: { fontSize: 12, color: '#9CA3AF', fontWeight: '500' },
+
+  statusBlock: { justifyContent: 'center', alignItems: 'flex-end', marginLeft: 6 },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  statusText: { fontSize: 11, fontWeight: '700' },
+
+  // Empty State Limpio
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 100,
+  },
+  emptyIconCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#ECECE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
 });

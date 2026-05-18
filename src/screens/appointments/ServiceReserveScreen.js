@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     paddingHorizontal: 16, 
     paddingVertical: 12,
+    marginTop:30
   },
   backButton: { width: 40, justifyContent: 'center' },
   backText: { fontSize: 32, color: COLORS.textDark, fontWeight: '300' },

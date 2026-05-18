@@ -1,10 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Platform, } from 'react-native';
 import { COLORS } from '../theme/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// Importación de las pantallas reales que controlará el Tab
+// Importación de pantallas basándonos en la estructura real de tus carpetas
 import HomeScreen from '../screens/home/HomeScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import PetsScreen from '../screens/pets/PetsScreen';
@@ -17,45 +16,38 @@ export default function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false,
-        // React Navigation manejará estos colores directamente sobre los iconos vectoriales
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textLight || '#9CA3AF',
-        
-        // Tu configuración de altura blindada para Android/iOS
+        headerShown: false, // Ocultamos el header por defecto para usar tus headers personalizados
+        tabBarActiveTintColor: COLORS.primary || '#149284', // Verde turquesa del mockup cuando está activo
+        tabBarInactiveTintColor: '#9CA3AF', // Gris cuando está inactivo
         tabBarStyle: {
-          backgroundColor: COLORS.white,
-          height: Platform.OS === 'ios' ? 100 : 100,
-          paddingBottom: Platform.OS === 'ios' ? 30 : 18,
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 0.5,
+          borderTopColor: '#F3F4F6',
+          height: 100,
+          paddingBottom: 10,
           paddingTop: 2,
-          borderTopWidth: 1,
-          borderTopColor: COLORS.border || '#E5E7EB',
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: 12,
+          fontWeight: '700',
         },
-
-        // CONTROL DE ICONOS VECTORIALES PROFESIONALES
-        tabBarIcon: ({ color, focused, size }) => {
+        // Mapeo dinámico de iconos según tu mockup original
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          // Seleccionamos el icono basado en la ruta
-          // focused ? 'icono-relleno' : 'icono-lineal' (aporta un feedback visual premium)
           if (route.name === 'Inicio') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Perfil') {
             iconName = focused ? 'person' : 'person-outline';
           } else if (route.name === 'Mascotas') {
-            iconName = focused ? 'paw' : 'paw-outline';
+            iconName = focused ? 'paw' : 'paw-outline'; // Icono de la patita central
           } else if (route.name === 'Citas') {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Tienda') {
             iconName = focused ? 'cart' : 'cart-outline';
           }
 
-          // Retornamos el componente nativo de la librería
-          return <Ionicons name={iconName} size={size ? size : 24} color={color} />;
+          return <Ionicons name={iconName} size={24} color={color} />;
         },
       })}
     >
