@@ -11,40 +11,38 @@ import {
   Dimensions 
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
+import HeartIcon from '../../assets/heart-icon';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({navigation}) {
-  // Datos simulados para las listas (luego vendrán de Firestore)
   const servicios = [
-    { id: '1', nombre: 'Guardería', img: require('../../assets/guarderia1.jpeg') },
-    { id: '2', nombre: 'Spa', img: require('../../assets/spa.jpeg') },
-    { id: '3', nombre: 'PetShop', img: require('../../assets/petshop.jpeg') },
+    { id: '1', nombre: 'Guardería', img: require('../../assets/guarde.jpeg') },
+    { id: '2', nombre: 'Spa', img: require('../../assets/spaaaa.jpeg') },
+    { id: '3', nombre: 'PetShop', img: require('../../assets/shopPet.jpeg') },
   ];
 
   const masSolicitados = [
-    { id: '1', nombre: 'Paseos', img: require('../../assets/paseo.png') },
-    { id: '2', nombre: 'Baño & Spa', img: require('../../assets/baño.jpeg') },
-    { id: '3', nombre: 'Alimentos', img: require('../../assets/guarderia1.jpeg') },
+    { id: '1', nombre: 'Paseos', img: require('../../assets/pase.jpeg') },
+    { id: '2', nombre: 'Baño & Spa', img: require('../../assets/baños.jpeg') },
+    { id: '3', nombre: 'Alimentos', img: require('../../assets/comida.png') },
   ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Iconos del celular de la parte superior siempre visibles */}
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.textDark} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
-        {/* --- HEADER (Todo en la misma línea) --- */}
+        {/* --- HEADER --- */}
         <View style={styles.header}>
           <Text style={styles.welcomeText}>¡Hola, Ana!</Text>
           <Image 
-            source={require('../../assets/flyer2.jpeg')} 
+            source={require('../../assets/logo.png')} 
             style={styles.headerLogo} 
             resizeMode="contain" 
           />
           <TouchableOpacity style={styles.notificationButton}>
-            {/* Campana nativa emulada con texto o icono */}
             <Text style={{ fontSize: 22 }}>🔔</Text>
           </TouchableOpacity>
         </View>
@@ -52,8 +50,18 @@ export default function HomeScreen({navigation}) {
         {/* --- BANNER PRINCIPAL --- */}
         <View style={styles.banner}>
           <View style={styles.bannerTextContainer}>
-            <Text style={styles.bannerText}>El lugar perfecto para su felicidad</Text>
-            <Text style={{ fontSize: 16, marginTop: 4 }}>♥ ✨</Text>
+            {/* CORREGIDO: El texto es el contenedor principal para que herede el salto de línea nativo */}
+            <Text style={styles.bannerTitle}>
+              Ellos se merecen lo mejor {"  "}      
+              {/* Envolvemos el SVG en un View inline dentro del Text para que viaje pegado a la palabra */}
+              <View style={styles.heartInlineContainer}>
+                <HeartIcon 
+                  color={COLORS.oro || '#D4AF37'} 
+                  size={24} 
+                />
+              </View>
+            </Text>
+            <Text style={styles.bannerSubTitle}>Servicios y productos pensados para su felicidad</Text>
           </View>
           <Image 
             source={require('../../assets/perroHome.jpg')} 
@@ -104,7 +112,7 @@ export default function HomeScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.white },
+  safeArea: { flex: 1, backgroundColor: COLORS.white},
   scrollContainer: { paddingHorizontal: 16, paddingBottom: 24 },
   
   // Header
@@ -112,29 +120,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 60,
-    marginTop: 8,
+    height: 80,
+    marginTop: 45,
     marginBottom: 16,
   },
   welcomeText: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela, flex: 1 },
-  headerLogo: { width: 100, height: 40, flex: 1 },
+  headerLogo: { width: 120, height: 60, flex: 1, marginTop: 20 },
   notificationButton: { width: 40, alignItems: 'flex-end', flex: 0.5 },
 
   // Banner
   banner: {
     backgroundColor: COLORS.primary,
-    borderRadius: 20,
+    borderRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     height: 130,
-    marginBottom: 24,
+    marginBottom: 30,
     overflow: 'hidden'
   },
-  bannerTextContainer: { width: '55%' },
-  bannerText: { color: COLORS.ciruela, fontSize: 18, fontWeight: 'bold', lineHeight: 22 },
-  bannerImage: { width: '45%', height: 140, position: 'absolute', right: 0, bottom: -10 },
+  bannerTextContainer: { width: '60%' },
+  bannerTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold', lineHeight: 22},
+  
+  // CORREGIDO: Ajustes para mantener el SVG inline perfectamente nivelado al texto
+  heartInlineContainer: {
+    width: 20,
+    height: 18,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop:2 // Ajuste fino para alinear verticalmente el corazón con el texto
+  },
+  
+  bannerSubTitle: { color: COLORS.white, fontSize: 13, lineHeight: 20, marginTop: 10 },
+  bannerImage: { width: '45%', height: 150, position: 'absolute', right: 0, bottom: -10 },
 
   // Secciones Comunes
   sectionHeader: { marginBottom: 12 },
@@ -143,10 +163,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center',
-    marginBottom: 24 
+    marginBottom: 40 
   },
   serviceCard: {
-    width: (width - 32 - 24) / 3, // Divide el espacio exacto restando márgenes
+    width: (width - 32 - 24) / 3,
     alignItems: 'center',
   },
   imageContainer: {

@@ -26,12 +26,12 @@ export default function ProfileScreen({ navigation }) {
         {/* --- BANNER DE PERFIL --- */}
         <View style={styles.profileHeader}>
           <Image 
-            source={require('../../assets/perroHome.jpg')} 
+            source={require('../../assets/foto.png')} 
             style={styles.avatar} 
           />
           <Text style={styles.userName}>Ana García</Text>
-          <Text style={styles.userDetail}>✉ ana.garcia@email.com</Text>
-          <Text style={styles.userDetail}>📞 +57 300 123 4567</Text>
+          <Text style={styles.userDetail}>ana.garcia@email.com</Text>
+          <Text style={styles.userDetail}> +57 300 123 4567</Text>
         </View>
 
         {/* --- CONTADORES EN RECUADROS (Mascotas y Citas) --- */}
@@ -70,7 +70,7 @@ export default function ProfileScreen({ navigation }) {
             onPress={() => navigation.replace('Login')}
             style={styles.logoutButton}
           >
-            <Text style={styles.logoutText}>🚪 Cerrar sesión</Text>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
           </TouchableOpacity>
         </View>
 
@@ -84,22 +84,23 @@ const styles = StyleSheet.create({
   
   // Header Banner
   profileHeader: {
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     paddingVertical: 32,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
+    marginTop: 30,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    borderWidth: 2,
     borderColor: COLORS.primary,
     marginBottom: 12,
   },
-  userName: { fontSize: 22, fontWeight: 'bold', color: COLORS.ciruela, marginBottom: 6 },
-  userDetail: { fontSize: 14, color: COLORS.textMedium, marginBottom: 2 },
+  userName: { fontSize: 22, fontWeight: 'bold', color: COLORS.white, marginBottom: 6 },
+  userDetail: { fontSize: 15, color: COLORS.white, marginBottom: 5 },
 
   // Stats Boxes
   statsContainer: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   menuItemLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   menuIcon: { fontSize: 18, marginRight: 12 },
   menuText: { fontSize: 15, color: COLORS.textDark, fontWeight: '500' },
-  arrowIcon: { fontSize: 22, color: COLORS.textLight },
+  arrowIcon: { fontSize: 24, color: COLORS.textLight },
 
   // Logout Button
   logoutButton: {

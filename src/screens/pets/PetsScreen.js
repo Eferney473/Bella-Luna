@@ -37,7 +37,7 @@ export default function PetsScreen({ navigation }) {
       onPress={() => navigation.navigate('DetalleMascota', { pet: item })}
     >
       <Image 
-        source={item.especie === 'Gato' ? require('../../assets/perroHome.jpg') : require('../../assets/logo_perros.jpeg')} 
+        source={item.especie === 'Perro' ? require('../../assets/otilio.jpeg') : require('../../assets/logo_perros.jpeg')} 
         style={styles.petAvatar} 
       />
       <View style={styles.petInfo}>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center'
   },
-  heartIcon: { fontSize: 24, marginRight: 12 },
+  heartIcon: { fontSize: 24, marginRight: 12},
   infoBannerText: { flex: 1, fontSize: 13, color: COLORS.textMedium, lineHeight: 18, fontWeight: '500' },
   emptyText: { textAlign: 'center', color: COLORS.textLight, marginTop: 40, fontSize: 14 }
 });

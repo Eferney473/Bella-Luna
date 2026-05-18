@@ -1,34 +1,125 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, SafeAreaView, StyleSheet } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  StatusBar, 
+  SafeAreaView, 
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform
+} from 'react-native';
 import { COLORS } from '../../theme/colors';
 
 export default function RegisterScreen({ navigation }) {
-  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', password: '', confirmPassword: '' });
+  // Estado unificado para capturar los datos
+  const [form, setForm] = useState({ 
+    nombre: '', 
+    email: '', 
+    telefono: '', 
+    password: '', 
+    confirmPassword: '' 
+  });
+
+  // Función manejadora para actualizar el estado de forma dinámica
+  const handleInputChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+  };
+
+  const handleRegister = () => {
+    console.log('Datos listos para registrar en Firebase:', form);
+    // Aquí conectarás tu Auth a futuro. Por ahora te simula el paso directo a la App:
+    navigation.replace('Home');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Crear cuenta</Text>
-        <Text style={styles.subtitle}>Completa tus datos para registrarte</Text>
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <Text style={styles.title}>Crear cuenta</Text>
+          <Text style={styles.subtitle}>Completa tus datos para registrarte</Text>
 
-        <TextInput placeholder="Nombre completo" placeholderTextColor={COLORS.textLight}color={COLORS.textDark} style={styles.input} />
-        <TextInput placeholder="Correo electrónico" keyboardType="email-address" autoCapitalize="none" placeholderTextColor={COLORS.textLight} style={styles.input} color={COLORS.textDark} />
-        <TextInput placeholder="Número de teléfono" keyboardType="phone-pad" placeholderTextColor={COLORS.textLight} style={styles.input} color={COLORS.textDark} />
-        <TextInput placeholder="Contraseña" secureTextEntry autoCapitalize="none" placeholderTextColor={COLORS.textLight} style={styles.input} color={COLORS.textDark} />
-        <TextInput placeholder="Confirmar contraseña" secureTextEntry autoCapitalize="none" placeholderTextColor={COLORS.textLight} style={styles.input} color={COLORS.textDark} />
+          {/* --- CAMPO: NOMBRE --- */}
+          <TextInput 
+            placeholder="Nombre completo" 
+            placeholderTextColor={COLORS.textLight}
+            value={form.nombre}
+            onChangeText={(val) => handleInputChange('nombre', val)}
+            style={styles.input} 
+          />
 
-        <TouchableOpacity onPress={() => console.log('Registrar')} style={styles.button}>
-          <Text style={styles.buttonText}>Crear cuenta</Text>
-        </TouchableOpacity>
+          {/* --- CAMPO: CORREO --- */}
+          <TextInput 
+            placeholder="Correo electrónico" 
+            keyboardType="email-address" 
+            autoCapitalize="none" 
+            placeholderTextColor={COLORS.textLight} 
+            value={form.email}
+            onChangeText={(val) => handleInputChange('email', val)}
+            style={styles.input} 
+          />
 
-        <View style={styles.loginContainer}>
-          <Text style={{ color: COLORS.gray }}>¿Ya tienes cuenta? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginText}>Iniciar sesión</Text>
+          {/* --- CAMPO: TELÉFONO --- */}
+          <TextInput 
+            placeholder="Número de teléfono" 
+            keyboardType="phone-pad" 
+            placeholderTextColor={COLORS.textLight} 
+            value={form.telefono}
+            onChangeText={(val) => handleInputChange('telefono', val)}
+            style={styles.input} 
+          />
+
+          {/* --- CAMPO: CONTRASEÑA --- */}
+          <TextInput 
+            placeholder="Contraseña" 
+            secureTextEntry={true}
+            autoCapitalize="none" 
+            autoCorrect={false}
+            textContentType="oneTimeCode" // Evita bloqueos de autocompletado en registros
+            placeholderTextColor={COLORS.textLight} 
+            value={form.password}
+            onChangeText={(val) => handleInputChange('password', val)}
+            style={styles.input} 
+          />
+
+          {/* --- CAMPO: CONFIRMAR CONTRASEÑA --- */}
+          <TextInput 
+            placeholder="Confirmar contraseña" 
+            secureTextEntry={true}
+            autoCapitalize="none" 
+            autoCorrect={false}
+            textContentType="oneTimeCode"
+            placeholderTextColor={COLORS.textLight} 
+            value={form.confirmPassword}
+            onChangeText={(val) => handleInputChange('confirmPassword', val)}
+            style={styles.input} 
+          />
+
+          {/* --- BOTÓN DE ACCIÓN --- */}
+          <TouchableOpacity onPress={handleRegister} style={styles.button}>
+            <Text style={styles.buttonText}>Crear cuenta</Text>
           </TouchableOpacity>
-        </View>
-      </ScrollView>
+
+          {/* --- ENLACE DE RETORNO --- */}
+          <View style={styles.loginContainer}>
+            <Text style={{ color: COLORS.textMedium || '#6B7280' }}>¿Ya tienes cuenta? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginText}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -36,17 +127,19 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.white },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 32 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.dark, textAlign: 'center', marginBottom: 8 },
-  subtitle: { color: COLORS.gray, textAlign: 'center', marginBottom: 32 },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, textAlign: 'center', marginBottom: 8 },
+  subtitle: { color: COLORS.textLight, textAlign: 'center', marginBottom: 32 },
   input: {
     height: 48,
     backgroundColor: COLORS.lightGray,
     paddingHorizontal: 16,
     borderRadius: 20,
-    color: COLORS.dark,
+    // Forzamos un color de texto oscuro estándar en caso de fallas en el archivo de colores
+    color: '#111827', 
     borderWidth: 1,
     borderColor: '#E5E7EB',
     marginBottom: 16,
+    fontSize: 14,
   },
   button: {
     height: 48,

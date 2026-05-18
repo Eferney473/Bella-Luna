@@ -91,7 +91,7 @@ export default function AppointmentsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.white },
   header: { paddingHorizontal: 20, paddingTop: 16, marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginTop: 50 },
   subtitle: { fontSize: 14, color: COLORS.textLight, marginTop: 4 },
   listContent: { paddingHorizontal: 20, paddingBottom: 24 },
 
@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.surface,
     paddingTop: 10
   },
-  totalLabel: { fontSize: 13, color: COLORS.textLight, fontWeight: '500' },
+  totalLabel: { fontSize: 13, color: COLORS.oro, fontWeight: 'bold' },
   totalPrice: { fontSize: 16, fontWeight: 'bold', color: COLORS.ciruela }
 });

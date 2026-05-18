@@ -27,7 +27,7 @@ export default function ShopScreen() {
       // Si la colección está vacía en Firebase, cargamos unos por defecto para pruebas
       if (productsList.length === 0) {
         setProducts([
-          { id: '1', nombre: 'Alimento Premium Perro', precio: 85000, marca: 'BellaNutri', img: require('../../assets/flyer2.jpeg'), tag: 'Top' },
+          { id: '1', nombre: 'Alimento Premium Perro', precio: 85000, marca: 'BellaNutri', img: require('../../assets/comida.png'), tag: 'Top' },
           { id: '2', nombre: 'Juguete Mordedor Gato', precio: 18000, marca: 'PetPlay', img: require('../../assets/petshop.jpeg'), tag: 'Nuevo' },
           { id: '3', nombre: 'Collar Estilizado Ciruela', precio: 32000, marca: 'BellaLuna', img: require('../../assets/spa.jpeg'), tag: '' },
           { id: '4', nombre: 'Snacks Naturales Uni', precio: 15000, marca: 'DoggyTreats', img: require('../../assets/guarderia1.jpeg'), tag: 'Oferta' },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   
   // Header y Buscador
   searchHeader: { paddingHorizontal: 20, paddingTop: 16, marginBottom: 12 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginBottom: 12 },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginBottom: 12, marginTop: 50 },
   searchContainer: { 
     flexDirection: 'row', 
     alignItems: 'center', 
