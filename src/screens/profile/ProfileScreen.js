@@ -31,30 +31,47 @@ export default function ProfileScreen({ navigation }) {
           />
           <Text style={styles.userName}>Ana García</Text>
           <Text style={styles.userDetail}>ana.garcia@email.com</Text>
-          <Text style={styles.userDetail}> +57 300 123 4567</Text>
+          <Text style={styles.userDetail}>+57 300 123 4567</Text>
         </View>
 
-        {/* --- CONTADORES EN RECUADROS (Mascotas y Citas) --- */}
+        {/* --- CONTADORES EN RECUADROS --- */}
         <View style={styles.statsContainer}>
+          {/* Caja de Mascotas */}
           <View style={styles.statBox}>
             <Text style={{ fontSize: 20 }}>🐾</Text>
             <Text style={styles.statTitle}>Mascotas</Text>
             <Text style={styles.statNumber}>2</Text>
-            <TouchableOpacity><Text style={styles.statLink}>Ver detalles</Text></TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Mascotas')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.statLink}>Ver detalles</Text>
+            </TouchableOpacity>
           </View>
 
+          {/* Caja de Citas Totales */}
           <View style={styles.statBox}>
             <Text style={{ fontSize: 20 }}>📅</Text>
             <Text style={styles.statTitle}>Citas totales</Text>
             <Text style={styles.statNumber}>8</Text>
-            <TouchableOpacity><Text style={styles.statLink}>Ver historial</Text></TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Citas')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.statLink}>Ver historial</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* --- MENÚ DE OPCIONES --- */}
         <View style={styles.menuContainer}>
           {menuOptions.map((option) => (
-            <TouchableOpacity key={option.id} style={styles.menuItem}>
+            <TouchableOpacity 
+              key={option.id} 
+              style={styles.menuItem}
+              onPress={() => alert(`${option.title} en desarrollo`)}
+              activeOpacity={0.6}
+            >
               <View style={styles.menuItemLeft}>
                 <Text style={styles.menuIcon}>{option.icon}</Text>
                 <Text style={styles.menuText}>{option.title}</Text>
@@ -69,6 +86,7 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity 
             onPress={() => navigation.replace('Login')}
             style={styles.logoutButton}
+            activeOpacity={0.8}
           >
             <Text style={styles.logoutText}>Cerrar sesión</Text>
           </TouchableOpacity>
@@ -94,9 +112,9 @@ const styles = StyleSheet.create({
   avatar: {
     width: 120,
     height: 120,
-    borderRadius: 100,
+    borderRadius: 60, // Cambiado a la mitad exacta para un círculo perfecto
     borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderColor: COLORS.white, // Borde blanco para que resalte sobre el fondo primario
     marginBottom: 12,
   },
   userName: { fontSize: 22, fontWeight: 'bold', color: COLORS.white, marginBottom: 6 },
@@ -107,7 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    marginTop: -20, // Monta ligeramente las cajas sobre el fondo menta suave
+    marginTop: -20, 
     marginBottom: 24,
   },
   statBox: {
@@ -122,34 +140,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  statTitle: { fontSize: 13, color: COLORS.textMedium, fontWeight: '500', marginTop: 4 },
+  statTitle: { fontSize: 13, color: COLORS.textMedium || '#6B7280', fontWeight: '500', marginTop: 4 },
   statNumber: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginVertical: 2 },
-  statLink: { fontSize: 11, color: COLORS.secondary, textDecorationLine: 'underline', fontWeight: '600' },
+  statLink: { fontSize: 11, color: COLORS.secondary || '#149284', textDecorationLine: 'underline', fontWeight: '600' },
 
   // Menu List
   menuContainer: { paddingHorizontal: 24, marginBottom: 16 },
   menuItem: {
     flexDirection: 'row',
-    justifyContent: 'between',
+    justifyContent: 'space-between', // CORREGIDO: de 'between' a 'space-between'
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.border || '#E5E7EB',
   },
   menuItemLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   menuIcon: { fontSize: 18, marginRight: 12 },
-  menuText: { fontSize: 15, color: COLORS.textDark, fontWeight: '500' },
-  arrowIcon: { fontSize: 24, color: COLORS.textLight },
+  menuText: { fontSize: 15, color: COLORS.textDark || '#1F2937', fontWeight: '500' },
+  arrowIcon: { fontSize: 24, color: COLORS.textLight || '#9CA3AF', paddingBottom: 4 },
 
   // Logout Button
   logoutButton: {
     borderWidth: 1.5,
-    borderColor: COLORS.accent,
+    borderColor: COLORS.accent || '#EF4444',
     height: 48,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.white,
   },
-  logoutText: { color: COLORS.accent, fontWeight: 'bold', fontSize: 16 }
+  logoutText: { color: COLORS.accent || '#EF4444', fontWeight: 'bold', fontSize: 16 }
 });

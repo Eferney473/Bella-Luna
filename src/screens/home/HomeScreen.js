@@ -15,18 +15,28 @@ import HeartIcon from '../../assets/heart-icon';
 
 const { width } = Dimensions.get('window');
 
-export default function HomeScreen({navigation}) {
+export default function HomeScreen({ navigation }) {
+  
   const servicios = [
-    { id: '1', nombre: 'Guardería', img: require('../../assets/guarde.jpeg') },
-    { id: '2', nombre: 'Spa', img: require('../../assets/spaaaa.jpeg') },
-    { id: '3', nombre: 'PetShop', img: require('../../assets/shopPet.jpeg') },
+    { id: '1', nombre: 'Guardería', img: require('../../assets/guarde.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
+    { id: '2', nombre: 'Spa', img: require('../../assets/spaaaa.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
+    { id: '3', nombre: 'Tienda', img: require('../../assets/shopPet.jpeg'), destino: 'Tienda', params: null },
   ];
 
   const masSolicitados = [
-    { id: '1', nombre: 'Paseos', img: require('../../assets/pase.jpeg') },
-    { id: '2', nombre: 'Baño & Spa', img: require('../../assets/baños.jpeg') },
-    { id: '3', nombre: 'Alimentos', img: require('../../assets/comida.png') },
+    { id: '1', nombre: 'Paseos', img: require('../../assets/pase.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Paseos' } },
+    { id: '2', nombre: 'Baño & Spa', img: require('../../assets/baños.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
+    { id: '3', nombre: 'Comida', img: require('../../assets/comida.png'), destino: 'Tienda', params: null },
   ];
+
+  // Helper centralizado para manejar la navegación de cualquier tarjeta
+  const handleNavigation = (item) => {
+    if (item.params) {
+      navigation.navigate(item.destino, item.params);
+    } else {
+      navigation.navigate(item.destino);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -50,10 +60,8 @@ export default function HomeScreen({navigation}) {
         {/* --- BANNER PRINCIPAL --- */}
         <View style={styles.banner}>
           <View style={styles.bannerTextContainer}>
-            {/* CORREGIDO: El texto es el contenedor principal para que herede el salto de línea nativo */}
             <Text style={styles.bannerTitle}>
               Ellos se merecen lo mejor {"  "}      
-              {/* Envolvemos el SVG en un View inline dentro del Text para que viaje pegado a la palabra */}
               <View style={styles.heartInlineContainer}>
                 <HeartIcon 
                   color={COLORS.oro || '#D4AF37'} 
@@ -80,7 +88,8 @@ export default function HomeScreen({navigation}) {
             <TouchableOpacity 
               key={item.id} 
               style={styles.serviceCard}
-              onPress={() => item.nombre === 'Guardería' && navigation.navigate('ReservarServicio')}
+              onPress={() => handleNavigation(item)}
+              activeOpacity={0.8}
             >
               <View style={styles.imageContainer}>
                 <Image source={item.img} style={styles.cardImage} />
@@ -97,7 +106,12 @@ export default function HomeScreen({navigation}) {
 
         <View style={styles.horizontalRow}>
           {masSolicitados.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.serviceCard}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.serviceCard}
+              onPress={() => handleNavigation(item)}
+              activeOpacity={0.8}
+            >
               <View style={styles.imageContainer}>
                 <Image source={item.img} style={styles.cardImage} />
               </View>
@@ -143,14 +157,13 @@ const styles = StyleSheet.create({
   bannerTextContainer: { width: '60%' },
   bannerTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold', lineHeight: 22},
   
-  // CORREGIDO: Ajustes para mantener el SVG inline perfectamente nivelado al texto
   heartInlineContainer: {
     width: 20,
     height: 18,
     marginLeft: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop:2 // Ajuste fino para alinear verticalmente el corazón con el texto
+    paddingTop:2 
   },
   
   bannerSubTitle: { color: COLORS.white, fontSize: 13, lineHeight: 20, marginTop: 10 },

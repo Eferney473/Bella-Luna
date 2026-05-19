@@ -5,10 +5,11 @@ import { COLORS } from '../../theme/colors';
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('Login');
+      navigation.replace('Login');  
     }, 3000);
     return () => clearTimeout(timer);
   }, [navigation]);
+  // Se usa replace para que el usuario no pueda "volver"
 
   return (
     <View style={styles.container}>

@@ -15,11 +15,26 @@ import { launchCamera } from 'react-native-image-picker';
 import { COLORS } from '../../theme/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-export default function PetDetailScreen({ navigation }) {
-  // Estado para manejar la foto dinámicamente desde la cámara o el asset por defecto
-  const [petPhoto, setPetPhoto] = useState(require('../../assets/otilio.jpeg'));
+export default function PetDetailScreen({ route, navigation }) {
+  // Capturamos los datos de la mascota enviados desde PetsScreen.
+  // Si por alguna razón no viene ninguno (por seguridad), cargamos datos por defecto.
+  const { mascota } = route.params || {
+    mascota: {
+      nombre: 'Luna',
+      raza: 'Golden Retriever',
+      genero: 'Hembra',
+      peso: '24 kg',
+      fechaNacimiento: '10/05/2021',
+      condiciones: 'Ninguna',
+      notas: 'Es muy juguetona',
+      img: require('../../assets/perroHome.jpg'), // Fallback seguro
+    }
+  };
 
-  // Función nativa e integrada para activar la cámara del celular
+  // Inicializamos el estado de la foto con la imagen que viene directamente en los datos de la mascota
+  const [petPhoto, setPetPhoto] = useState(mascota.img);
+
+  // Función integrada para activar la cámara del celular
   const handleTakeDocumentPhoto = () => {
     const options = {
       mediaType: 'photo',
@@ -52,7 +67,6 @@ export default function PetDetailScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Un color de fondo ligeramente off-white para que la tarjeta blanca resalte en capas */}
       <StatusBar barStyle="dark-content" backgroundColor="#F9F9F6" />
       
       {/* --- HEADER --- */}
@@ -61,36 +75,36 @@ export default function PetDetailScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color={COLORS.ciruela} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detalle de Mascota</Text>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton} onPress={() => Alert.alert("Editar", "Módulo de edición en desarrollo")}>
           <Text style={{ fontSize: 15 }}>✏️</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
-        {/* --- PERFIL MASCOTA --- */}
+        {/* --- PERFIL MASCOTA DINÁMICO --- */}
         <View style={styles.profileContainer}>
           <View style={styles.avatarWrapper}>
             <Image 
               source={typeof petPhoto === 'number' ? petPhoto : { uri: petPhoto.uri }} 
               style={styles.avatarImage} 
             />
-            {/* Botón de cámara estilizado con el color de marca */}
+            {/* Botón de cámara estilizado */}
             <TouchableOpacity style={styles.cameraBadge} onPress={handleTakeDocumentPhoto}>
               <Ionicons name="camera" size={18} color={COLORS.white} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.petName}>Luna</Text>
-          <Text style={styles.petBreed}>Golden Retriever</Text>
+          <Text style={styles.petName}>{mascota.nombre}</Text>
+          <Text style={styles.petBreed}>{mascota.raza}</Text>
         </View>
 
-        {/* --- TARJETA UNIFICADA DE INFORMACIÓN (MEJORA DE DISEÑO UX/UI) --- */}
+        {/* --- TARJETA UNIFICADA DE INFORMACIÓN DINÁMICA --- */}
         <View style={styles.unifiedCard}>
-          {renderDetailItem('📅', 'Fecha de nacimiento', '10/05/2021')}
-          {renderDetailItem('  ⚧', ' Género', 'Hembra')}
-          {renderDetailItem('⚖️', 'Peso', '24 kg')}
-          {renderDetailItem('🩺', 'Condiciones médicas', 'Ninguna')}
-          {renderDetailItem('📝', 'Notas', 'Es muy juguetona', true)}
+          {renderDetailItem('📅', 'Fecha de nacimiento', mascota.fechaNacimiento)}
+          {renderDetailItem(' ⚧', ' Género', mascota.genero)}
+          {renderDetailItem('⚖️', 'Peso', mascota.peso)}
+          {renderDetailItem('🩺', 'Condiciones médicas', mascota.condiciones)}
+          {renderDetailItem('📝', 'Notas', mascota.notas, true)}
         </View>
 
       </ScrollView>
@@ -99,7 +113,6 @@ export default function PetDetailScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  // Fondo off-white profesional para generar contraste tridimensional con la tarjeta blanca
   safeArea: { flex: 1, backgroundColor: '#F9F9F6' },
   scrollContainer: { paddingHorizontal: 16, paddingBottom: 40 },
   
@@ -144,7 +157,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#F9F9F6', // Unificado con el fondo exterior
+    borderColor: '#F9F9F6', 
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -154,13 +167,12 @@ const styles = StyleSheet.create({
   petName: { fontSize: 24, fontWeight: 'bold', color: COLORS.textDark || '#1F2937', marginTop: 14 },
   petBreed: { fontSize: 15, color: COLORS.textLight || '#6B7280', marginTop: 2 },
 
-  // DISEÑO DE TARJETA UNIFICADA PREMIUM (Quita el corte azul plano)
+  // Tarjeta Unificada Premium
   unifiedCard: {
     backgroundColor: COLORS.white || '#FFFFFF',
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    // Sombras nativas ultra suaves para dar efecto de elevación limpia
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -179,10 +191,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6', // Separador interno sutil
+    borderBottomColor: '#F3F4F6', 
   },
   lastRow: {
-    borderBottomWidth: 0, // El último elemento no lleva línea divisoria
+    borderBottomWidth: 0, 
   },
   labelGroup: {
     flexDirection: 'row',

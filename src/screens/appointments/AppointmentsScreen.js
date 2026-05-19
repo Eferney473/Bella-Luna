@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -15,10 +15,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
-export default function AppointmentsScreen({ navigation }) {
+export default function AppointmentsScreen({ route, navigation }) {
   const [activeTab, setActiveTab] = useState('proximas');
 
-  const citasProximas = [
+  // Estado mutable para las próximas citas para que reciba las nuevas reservas en tiempo real
+  const [citasProximas, setCitasProximas] = useState([
     {
       id: '1',
       tipo: 'servicio',
@@ -39,7 +40,7 @@ export default function AppointmentsScreen({ navigation }) {
       estado: 'Pendiente',
       icon: 'home-outline',
     },
-  ];
+  ]);
 
   const historialActividad = [
     {
@@ -65,6 +66,23 @@ export default function AppointmentsScreen({ navigation }) {
     },
   ];
 
+  // Escuchador de parámetros de React Navigation para capturar nuevas citas creadas en caliente
+  useEffect(() => {
+    if (route.params?.nuevaCita) {
+      const citaRecibida = route.params.nuevaCita;
+      
+      setCitasProximas((prevCitas) => {
+        // Evitamos duplicar la cita si la pantalla se re-renderiza por otra razón
+        const existe = prevCitas.some(c => c.id === citaRecibida.id);
+        if (existe) return prevCitas;
+        return [citaRecibida, ...prevCitas]; // La inserta al inicio de la lista
+      });
+      
+      // Forzamos la vista a la pestaña "Próximas" para ver el cambio instantáneo
+      setActiveTab('proximas');
+    }
+  }, [route.params?.nuevaCita]);
+
   const getStatusStyle = (item) => {
     if (item.tipo === 'compra') {
       return { bg: '#EBF5FF', text: '#1E40AF' }; // Azul premium para compras
@@ -73,7 +91,7 @@ export default function AppointmentsScreen({ navigation }) {
       case 'Confirmada':
         return { bg: '#E6F4EA', text: '#137333' }; // Verde
       case 'Pendiente':
-        return { bg: '#FFF7ED', text: '#C2410C' }; // Naranja/Amarillo moderno
+        return { bg: '#FFF7ED', text: '#C2410C' }; // Naranja moderno
       case 'Completado':
       default:
         return { bg: '#F3F4F6', text: '#4B5563' }; // Gris neutro
@@ -82,13 +100,16 @@ export default function AppointmentsScreen({ navigation }) {
 
   const renderItemCard = ({ item }) => {
     const statusColor = getStatusStyle(item);
+    const splitFecha = item.fecha.split(' ');
+    const dia = splitFecha[0] || '';
+    const mes = splitFecha[1] || '';
 
     return (
       <View style={styles.appointmentCard}>
         {/* Bloque Izquierdo Estilizado (Fecha) */}
         <View style={styles.dateBlock}>
-          <Text style={styles.dateTextDay}>{item.fecha.split(' ')[0]}</Text>
-          <Text style={styles.dateTextMonth}>{item.fecha.split(' ')[1].toUpperCase()}</Text>
+          <Text style={styles.dateTextDay}>{dia}</Text>
+          <Text style={styles.dateTextMonth}>{mes.toUpperCase()}</Text>
         </View>
 
         {/* Bloque Central con Jerarquía de Textos */}
@@ -143,14 +164,14 @@ export default function AppointmentsScreen({ navigation }) {
         <Text style={styles.headerTitle}>Actividad y Citas</Text>
         <TouchableOpacity 
           style={styles.addButton} 
-          onPress={() => navigation.navigate('ReservarServicio')}
+          onPress={() => navigation.navigate('ReservarServicio', { servicio: 'Guardería' })}
           activeOpacity={0.8}
         >
           <Ionicons name="add" size={24} color={COLORS.white} />
         </TouchableOpacity>
       </View>
 
-      {/* --- TAB SELECTOR DISEÑO TIPO PÍLDORA FLOTANTE --- */}
+      {/* --- TAB SELECTOR TIPO PÍLDORA FLOTANTE --- */}
       <View style={styles.tabWrapper}>
         <View style={styles.tabContainer}>
           <TouchableOpacity 
@@ -198,15 +219,13 @@ export default function AppointmentsScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9F9F6' },
   
-  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     height: 70,
     paddingHorizontal: 20,
-    marginTop:60,
-    marginBottom: 30,
+    margin: 50,
     backgroundColor: '#F9F9F6',
   },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela },
@@ -214,7 +233,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary || '#149284',
     width: 42,
     height: 42,
-    borderRadius: 20,
+    marginLeft: 30,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
@@ -224,7 +244,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
 
-  // Contenedor de Píldora Selector de pestañas (Estilo moderno)
   tabWrapper: {
     paddingHorizontal: 16,
     marginBottom: 20,
@@ -243,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 21,
   },
   activeTab: {
-    backgroundColor: COLORS.oro || '#FFFFFF',
+    backgroundColor: COLORS.white || '#FFFFFF',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -262,7 +281,6 @@ const styles = StyleSheet.create({
 
   listContainer: { paddingHorizontal: 16, paddingBottom: 40 },
 
-  // Tarjeta de Cita Avanzada (Efecto Elevación Premium)
   appointmentCard: {
     backgroundColor: COLORS.white || '#FFFFFF',
     borderRadius: 20,
@@ -311,7 +329,7 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   metaLabel: { fontSize: 13, color: '#6B7280', marginRight: 4 },
   metaValue: { fontSize: 13, fontWeight: '600', color: '#374151' },
-  priceValue: { color: '#10B981' }, // Color verde éxito para el precio
+  priceValue: { color: '#10B981' },
 
   timeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
   timeText: { fontSize: 12, color: '#9CA3AF', fontWeight: '500' },
@@ -324,7 +342,6 @@ const styles = StyleSheet.create({
   },
   statusText: { fontSize: 11, fontWeight: '700' },
 
-  // Empty State Limpio
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
