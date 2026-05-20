@@ -1,7 +1,7 @@
 export const COLORS = {
   primary: '#70C1B3',       // Verde menta principal (Splash, botones, banners)
-  ciruela: '#4A1E35',       // Ciruela/Vino elegante (Títulos destacados, énfasis de marca)
-  oro: '#D4AF37',          // Oro/Dorado (Para resaltar "Más solicitado", estrellas, premium)
+  ciruela: '#59374F',       // Ciruela/Vino elegante (Títulos destacados, énfasis de marca)
+  oro: '#E1B01E',          // Oro/Dorado (Para resaltar "Más solicitado", estrellas, premium)
   
   // --- VARIACIONES DE SOPORTE ---
   primaryDark: '#56A396',   // Tono más oscuro de menta para estados presionados

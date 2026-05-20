@@ -12,24 +12,24 @@ import {
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import HeartIcon from '../../assets/heart-icon';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   
   const servicios = [
-    { id: '1', nombre: 'Guardería', img: require('../../assets/guarde.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
-    { id: '2', nombre: 'Spa', img: require('../../assets/spaaaa.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '3', nombre: 'Tienda', img: require('../../assets/shopPet.jpeg'), destino: 'Tienda', params: null },
+    { id: '1', nombre: 'Guardería', sublabel: '5 planes', img: require('../../assets/guarderia11.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
+    { id: '2', nombre: 'Spa canino', sublabel: 'Baño · Peluquería', img: require('../../assets/bañito.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
+    { id: '3', nombre: 'Tienda', sublabel: 'Tienda online', img: require('../../assets/petshopin.jpeg'), destino: 'Tienda', params: null },
+    { id: '4', nombre: 'Citas', sublabel: 'Agenda aquí', img: require('../../assets/pase.jpeg'), destino: 'Citas', params: null },
   ];
 
   const masSolicitados = [
-    { id: '1', nombre: 'Paseos', img: require('../../assets/pase.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Paseos' } },
-    { id: '2', nombre: 'Baño & Spa', img: require('../../assets/baños.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '3', nombre: 'Comida', img: require('../../assets/comida.png'), destino: 'Tienda', params: null },
+    { id: '1', nombre: 'Baño completo', detalle: 'Spa canino · desde $45.000', tag: 'Popular', colorTag: '#FAF5FF', textTag: '#7C3AED', img: require('../../assets/baños.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
+    { id: '2', nombre: 'Mañanas de parque', detalle: 'Guardería · 9am–1pm', tag: 'Nuevo', colorTag: '#E6F4EA', textTag: '#137333', img: require('../../assets/guarde.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
   ];
 
-  // Helper centralizado para manejar la navegación de cualquier tarjeta
   const handleNavigation = (item) => {
     if (item.params) {
       navigation.navigate(item.destino, item.params);
@@ -53,7 +53,7 @@ export default function HomeScreen({ navigation }) {
             resizeMode="contain" 
           />
           <TouchableOpacity style={styles.notificationButton}>
-            <Text style={{ fontSize: 22 }}>🔔</Text>
+            <Ionicons name="notifications" size={24} color={COLORS.ciruela} />
           </TouchableOpacity>
         </View>
 
@@ -66,6 +66,7 @@ export default function HomeScreen({ navigation }) {
                 <HeartIcon 
                   color={COLORS.oro || '#D4AF37'} 
                   size={24} 
+                  value={null}
                 />
               </View>
             </Text>
@@ -78,23 +79,29 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* --- SECCIÓN SERVICIOS --- */}
+        {/* --- SECCIÓN NUESTROS SERVICIOS --- */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Servicios</Text>
+          <Text style={styles.sectionTitle}>Nuestros servicios</Text>
         </View>
         
-        <View style={styles.horizontalRow}>
+        <View style={styles.servicesGrid}>
           {servicios.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={styles.serviceCard}
+              style={styles.gridCard}
               onPress={() => handleNavigation(item)}
               activeOpacity={0.8}
             >
-              <View style={styles.imageContainer}>
+              {/* Contenedor de la Imagen: Ocupa todo el ancho superior de la tarjeta */}
+              <View style={styles.gridImageContainer}>
                 <Image source={item.img} style={styles.cardImage} />
               </View>
-              <Text style={styles.cardLabel}>{item.nombre}</Text>
+              
+              {/* Bloque de Textos: Margen interno propio abajo de la imagen */}
+              <View style={styles.cardTextContent}>
+                <Text style={styles.gridCardLabel} numberOfLines={1}>{item.nombre}</Text>
+                <Text style={styles.gridCardSubLabel} numberOfLines={1}>{item.sublabel}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -104,18 +111,26 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.sectionTitle}>Más solicitado</Text>
         </View>
 
-        <View style={styles.horizontalRow}>
+        <View style={styles.verticalContainer}>
           {masSolicitados.map((item) => (
             <TouchableOpacity 
               key={item.id} 
-              style={styles.serviceCard}
+              style={styles.verticalRowCard}
               onPress={() => handleNavigation(item)}
               activeOpacity={0.8}
             >
-              <View style={styles.imageContainer}>
+              <View style={styles.verticalImageContainer}>
                 <Image source={item.img} style={styles.cardImage} />
               </View>
-              <Text style={styles.cardLabel}>{item.nombre}</Text>
+              
+              <View style={styles.verticalTextContent}>
+                <Text style={styles.verticalCardTitle}>{item.nombre}</Text>
+                <Text style={styles.verticalCardSubTitle}>{item.detalle}</Text>
+              </View>
+
+              <View style={[styles.tagBadge, { backgroundColor: item.colorTag }]}>
+                <Text style={[styles.tagBadgeText, { color: item.textTag }]}>{item.tag}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -129,7 +144,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.white},
   scrollContainer: { paddingHorizontal: 16, paddingBottom: 24 },
   
-  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -139,10 +153,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   welcomeText: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela, flex: 1 },
-  headerLogo: { width: 120, height: 60, flex: 1, marginTop: 20 },
-  notificationButton: { width: 40, alignItems: 'flex-end', flex: 0.5 },
+  headerLogo: { width: 120, height: 60, flex: 1, marginTop: 20, color: COLORS.ciruela, },
+  notificationButton: { width: 40, alignItems: 'flex-end', flex: 0.5,  },
 
-  // Banner
   banner: {
     backgroundColor: COLORS.primary,
     borderRadius: 15,
@@ -150,50 +163,101 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    height: 130,
+    height: 110,
     marginBottom: 30,
     overflow: 'hidden'
   },
   bannerTextContainer: { width: '60%' },
-  bannerTitle: { color: COLORS.white, fontSize: 18, fontWeight: 'bold', lineHeight: 22},
+  bannerTitle: { color: COLORS.white, fontSize: 16, fontWeight: 'bold', lineHeight: 22},
   
   heartInlineContainer: {
-    width: 20,
-    height: 18,
-    marginLeft: 8,
+    width: 18,
+    height: 16,
+    marginLeft: 6,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop:2 
   },
   
-  bannerSubTitle: { color: COLORS.white, fontSize: 13, lineHeight: 20, marginTop: 10 },
-  bannerImage: { width: '45%', height: 150, position: 'absolute', right: 0, bottom: -10 },
+  bannerSubTitle: { color: COLORS.white, fontSize: 12, lineHeight: 20, marginTop: 4 },
+  bannerImage: { width: '40%', height: 140, position: 'absolute', right: 0, bottom: -10 },
 
-  // Secciones Comunes
-  sectionHeader: { marginBottom: 12 },
+  sectionHeader: { marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.ciruela },
-  horizontalRow: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    marginBottom: 40 
+
+  // Cuadrícula de 2 columnas optimizada para imágenes completas superiores
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
-  serviceCard: {
-    width: (width - 32 - 24) / 3,
-    alignItems: 'center',
-  },
-  imageContainer: {
-    width: '100%',
-    height: 90,
+  gridCard: {
+    width: (width - 32 - 12) / 2, 
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#E1B01E',
     borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: COLORS.surface,
-    elevation: 2,
+    overflow: 'hidden', // Obliga a la imagen a respetar las esquinas redondeadas de la tarjeta
+    marginBottom: 12,
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowOpacity: 0.04,
+    shadowRadius: 1.5,
   },
-  cardImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  cardLabel: { marginTop: 8, fontSize: 14, fontWeight: '600', color: COLORS.textDark, textAlign: 'center' }
+  gridImageContainer: {
+    width: '100%', 
+    height: 100, // Controla la altura fija que tendrá la imagen dentro de la tarjeta
+    backgroundColor: '#F3F4F6',
+  },
+  cardTextContent: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: 'center', // Alinea los dos textos perfectamente al centro debajo de la imagen
+  },
+  gridCardLabel: { fontSize: 14, fontWeight: 'bold', color: COLORS.textDark || '#1F2937', textAlign: 'center', marginBottom: 2 },
+  gridCardSubLabel: { fontSize: 11, color: '#9CA3AF', textAlign: 'center' },
+
+  // Sección Más Solicitado
+  verticalContainer: {
+    marginBottom: 20,
+  },
+  verticalRowCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#59374F',
+    borderRadius: 18,
+    padding: 10, 
+    marginBottom: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 1.5,
+  },
+  verticalImageContainer: {
+    width: 50, 
+    height: 50,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#F3F4F6',
+  },
+  verticalTextContent: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  verticalCardTitle: { fontSize: 14, fontWeight: 'bold', color: '#1F2937', marginBottom: 2 },
+  verticalCardSubTitle: { fontSize: 11, color: '#6B7280' },
+  
+  tagBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  tagBadgeText: { fontSize: 10, fontWeight: 'bold' },
+
+  cardImage: { width: '100%', height: '100%', resizeMode: 'cover' }
 });

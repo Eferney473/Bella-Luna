@@ -26,7 +26,7 @@ export default function ProfileScreen({ navigation }) {
         {/* --- BANNER DE PERFIL --- */}
         <View style={styles.profileHeader}>
           <Image 
-            source={require('../../assets/foto.png')} 
+            source={require('../../assets/perfilAna.jpg')} 
             style={styles.avatar} 
           />
           <Text style={styles.userName}>Ana García</Text>
