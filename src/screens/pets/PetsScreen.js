@@ -5,11 +5,9 @@ import {
   SafeAreaView, 
   StatusBar, 
   FlatList, 
-  Image, 
   TouchableOpacity, 
   StyleSheet, 
-  Dimensions,
-  Platform
+  Dimensions 
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,206 +16,254 @@ const { width } = Dimensions.get('window');
 
 export default function PetsScreen({ navigation }) {
   
-  // Lista local de mascotas (por ahora solo Luna, con los datos de tu maqueta)
   const misMascotas = [
     {
       id: '1',
-      nombre: 'Luna',
+      nombre: 'Max',
       raza: 'Golden Retriever',
+      edad: '3 años',
+      genero: 'Macho',
+      peso: '28 kg',
+      bgColor: '#54D1A3', // Color del fondo del ícono izquierdo
+    },
+    {
+      id: '2',
+      nombre: 'Luna',
+      raza: 'Gato persa',
+      edad: '2 años',
       genero: 'Hembra',
-      peso: '24 kg',
-      fechaNacimiento: '10/05/2021',
-      condiciones: 'Ninguna',
-      notas: 'Es muy juguetona',
-      img: require('../../assets/perroHome.jpg'), // Usando el asset de portada para la lista
+      peso: '4 kg',
+      bgColor: '#FFC816', // Color del fondo del ícono izquierdo
     },
   ];
 
-  // Manejador del click hacia el detalle
-  const handlePetPress = (mascota) => {
-    navigation.navigate('DetalleMascota', { mascota: mascota });
-  };
+  const renderPetCard = ({ item }) => (
+    <View style={styles.petCard}>
+      {/* Icono izquierdo con fondo de color */}
+      <View style={[styles.petIconContainer, { backgroundColor: item.bgColor }]}>
+        <Ionicons name="paw" size={32} color={COLORS.white} />
+      </View>
 
-  const renderPetCard = ({ item }) => {
-    return (
-      <TouchableOpacity 
-        style={styles.petCard}
-        onPress={() => handlePetPress(item)}
-        activeOpacity={0.9}
-      >
-        <Image source={item.img} style={styles.petImage} resizeMode="cover" />
+      {/* Información Central */}
+      <View style={styles.infoContainer}>
+        <Text style={styles.petName}>{item.nombre}</Text>
+        <Text style={styles.petDetails}>{item.raza} · {item.edad}</Text>
         
-        <View style={styles.infoContainer}>
-          <View style={styles.titleRow}>
-            <Text style={styles.petName}>{item.nombre}</Text>
-            <Ionicons 
-              name={item.genero === 'Hembra' ? 'female' : 'male'} 
-              size={18} 
-              color={item.genero === 'Hembra' ? '#EC4899' : '#3B82F6'} 
-            />
+        <View style={styles.badgeRow}>
+          <View style={[styles.badge, { backgroundColor: '#FAF5FF' }]}>
+            <Text style={[styles.badgeText, { color: COLORS.ciruela }]}>{item.genero}</Text>
           </View>
-          
-          <Text style={styles.petBreed}>{item.raza}</Text>
-          
-          <View style={styles.tagRow}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item.peso}</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: '#EFF6FF' }]}>
-              <Text style={[styles.badgeText, { color: '#1E40AF' }]}>3 Años</Text>
-            </View>
+          <View style={[styles.badge, { backgroundColor: '#E6F4EA' }]}>
+            <Text style={[styles.badgeText, { color: '#137333' }]}>{item.peso}</Text>
           </View>
         </View>
+      </View>
 
-        <View style={styles.arrowContainer}>
-          <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-        </View>
-      </TouchableOpacity>
-    );
-  };
+      {/* Botones de Acción Derecho */}
+      <View style={styles.actionContainer}>
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="create-outline" size={20} color={COLORS.primary || '#149284'} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="trash-outline" size={20} color="#EF4444" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      <StatusBar barStyle="light-content" backgroundColor="#54D1A3" />
       
-      {/* --- HEADER --- */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mis Mascotas</Text>
+      {/* --- HEADER CON FONDO VERDE MENTA (SOLO TÍTULO, SUBTÍTULO Y BOTÓN CIRCULAR) --- */}
+      <View style={styles.greenHeader}>
+        <View style={styles.headerTextGroup}>
+          <Text style={styles.headerTitle}>Mis mascotas</Text>
+          <Text style={styles.headerSubtitle}>Bella Luna · Como en casa</Text>
+        </View>
         <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => alert('Formulario para agregar mascota en desarrollo')}
+          style={styles.headerAddButton}
+          onPress={() => alert('Agregar mascota')}
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={22} color={COLORS.white} style={{ marginRight: 4 }} />
-          <Text style={styles.addButtonText}>Agregar</Text>
+          <Ionicons name="add" size={28} color={COLORS.oro} />
         </TouchableOpacity>
       </View>
 
-      {/* --- LISTADO DE MASCOTAS --- */}
-      <FlatList
-        data={misMascotas}
-        keyExtractor={(item) => item.id}
-        renderItem={renderPetCard}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="paw-outline" size={48} color="#9CA3AF" />
-            <Text style={styles.emptyText}>Aún no registras ninguna mascota</Text>
-          </View>
-        }
-      />
+      {/* --- CONTENEDOR BLANCO GENERAL PARA LAS TARJETAS --- */}
+      <View style={styles.whiteBodyContainer}>
+        <FlatList
+          data={misMascotas}
+          keyExtractor={(item) => item.id}
+          renderItem={renderPetCard}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            <TouchableOpacity style={styles.addCardDashed} activeOpacity={0.7}>
+              <View style={styles.addIconCircle}>
+                <Ionicons name="add" size={26} color={COLORS.primary || '#149284'} />
+              </View>
+              <Text style={styles.addCardText}>Agregar mascota</Text>
+            </TouchableOpacity>
+          }
+        />
+      </View>
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.white },
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: '#54D1A3' // Mantiene la parte superior del notch del mismo color
+  },
   
-  // Header
-  header: {
+  // Header Verde Menta Aislado
+  greenHeader: {
+    backgroundColor: '#54D1A3',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 70,
-    paddingHorizontal: 16,
-    margin: 50,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 28,
+    marginTop:50
   },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela },
-  addButton: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.primary || '#149284',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+  headerTextGroup: {
+    flexDirection: 'column',
+  },
+  headerTitle: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: COLORS.white 
+  },
+  headerSubtitle: { 
+    fontSize: 13, 
+    color: COLORS.white,
+    opacity: 0.9,
+    marginTop: 2
+  },
+  headerAddButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: COLORS.ciruela, // Botón circular morado
+    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+
+  // Contenedor Blanco Inferior (Panel)
+  whiteBodyContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
+  
+  },
+  listContainer: { 
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 30
+  },
+
+  // Tarjetas de Mascota
+  petCard: {
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ECECE7',
+    flexDirection: 'row',
+    padding: 14,
+    marginTop: 20,
+
+    alignItems: 'center',
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
   },
-  addButtonText: { color: COLORS.white, fontWeight: 'bold', fontSize: 14 },
-
-  listContainer: { padding: 16 },
-
-  // Tarjeta de Mascota Premium
-  petCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
-    flexDirection: 'row',
-    padding: 12,
-    marginBottom: 16,
+  petIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  petImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 14,
-    backgroundColor: '#F3F4F6',
   },
   infoContainer: {
     flex: 1,
     marginLeft: 14,
-    justifyContent: 'center',
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
   },
   petName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.textDark || '#1F2937',
-    marginRight: 8,
+    color: COLORS.ciruela,
+    marginBottom: 2,
   },
-  petBreed: {
-    fontSize: 14,
+  petDetails: {
+    fontSize: 12,
     color: '#6B7280',
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  tagRow: {
+  badgeRow: {
     flexDirection: 'row',
   },
   badge: {
-    backgroundColor: '#F3F4F6',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 8,
-    marginRight: 8,
+    marginRight: 6,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
+    fontSize: 11,
+    fontWeight: 'bold',
   },
-  arrowContainer: {
-    paddingHorizontal: 4,
+  actionContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    height: 60,
+    paddingLeft: 4,
+  },
+  actionButton: {
+    padding: 4,
   },
 
-  // Empty State
-  emptyContainer: {
+  // Botón de agregar mascota punteado (Dashed)
+  addCardDashed: {
+    backgroundColor: '#E8F6F4',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+    height: 100,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 100,
+    marginTop: 50
   },
-  emptyText: {
-    marginTop: 12,
-    fontSize: 16,
+  addIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+  },
+  addCardText: {
     color: '#9CA3AF',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

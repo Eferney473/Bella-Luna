@@ -3,94 +3,88 @@ import {
   View, 
   Text, 
   SafeAreaView, 
-  Image, 
   TouchableOpacity, 
   StyleSheet, 
-  ScrollView 
+  ScrollView,
+  StatusBar
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function ProfileScreen({ navigation }) {
   
   const menuOptions = [
-    { id: '1', title: 'Información personal', icon: '👤' },
-    { id: '2', title: 'Métodos de pago', icon: '💳' },
-    { id: '3', title: 'Direcciones', icon: '📍' },
-    { id: '4', title: 'Notificaciones', icon: '🔔' },
+    { id: '1', title: 'Datos personales' },
+    { id: '2', title: 'Notificaciones' },
+    { id: '3', title: 'Mis direcciones' },
+    { id: '4', title: 'Cambiar contraseña' },
   ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.ciruela} />
+      
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
         
-        {/* --- BANNER DE PERFIL --- */}
-        <View style={styles.profileHeader}>
-          <Image 
-            source={require('../../assets/perfilAna.jpg')} 
-            style={styles.avatar} 
-          />
-          <Text style={styles.userName}>Ana García</Text>
-          <Text style={styles.userDetail}>ana.garcia@email.com</Text>
-          <Text style={styles.userDetail}>+57 300 123 4567</Text>
+        {/* --- HEADER PLUM (CIRUELA) --- */}
+        <View style={styles.headerBanner}>
+          <View style={styles.topIcons}>
+            <Text style={styles.headerTitle}>Mi perfil</Text>
+            <TouchableOpacity>
+              <Ionicons name="ellipsis-horizontal" size={24} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.profileInfo}>
+            {/* Avatar con Iniciales (AG) */}
+            <View style={styles.initialsAvatar}>
+              <Text style={styles.initialsText}>AG</Text>
+            </View>
+            <View style={styles.textInfo}>
+              <Text style={styles.userName}>Ana García</Text>
+              <Text style={styles.userEmail}>ana@email.com</Text>
+              <Text style={styles.userPhone}>311 5572056</Text>
+            </View>
+          </View>
         </View>
 
-        {/* --- CONTADORES EN RECUADROS --- */}
+        {/* --- ESTADÍSTICAS (OVERLAP) --- */}
         <View style={styles.statsContainer}>
-          {/* Caja de Mascotas */}
           <View style={styles.statBox}>
-            <Text style={{ fontSize: 20 }}>🐾</Text>
-            <Text style={styles.statTitle}>Mascotas</Text>
-            <Text style={styles.statNumber}>2</Text>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('Mascotas')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.statLink}>Ver detalles</Text>
-            </TouchableOpacity>
+            <Text style={[styles.statNumber, { color: COLORS.ciruela }]}>12</Text>
+            <Text style={styles.statLabel}>Citas totales</Text>
           </View>
-
-          {/* Caja de Citas Totales */}
           <View style={styles.statBox}>
-            <Text style={{ fontSize: 20 }}>📅</Text>
-            <Text style={styles.statTitle}>Citas totales</Text>
-            <Text style={styles.statNumber}>8</Text>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('Citas')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.statLink}>Ver historial</Text>
-            </TouchableOpacity>
+            <Text style={[styles.statNumber, { color: '#149284' }]}>2</Text>
+            <Text style={styles.statLabel}>Mascotas</Text>
           </View>
         </View>
 
-        {/* --- MENÚ DE OPCIONES --- */}
-        <View style={styles.menuContainer}>
-          {menuOptions.map((option) => (
+        {/* --- MENÚ AGRUPADO --- */}
+        <View style={styles.menuGroup}>
+          {menuOptions.map((option, index) => (
             <TouchableOpacity 
               key={option.id} 
-              style={styles.menuItem}
+              style={[
+                styles.menuItem, 
+                index === menuOptions.length - 1 && { borderBottomWidth: 0 }
+              ]}
               onPress={() => alert(`${option.title} en desarrollo`)}
               activeOpacity={0.6}
             >
-              <View style={styles.menuItemLeft}>
-                <Text style={styles.menuIcon}>{option.icon}</Text>
-                <Text style={styles.menuText}>{option.title}</Text>
-              </View>
-              <Text style={styles.arrowIcon}>›</Text>
+              <Text style={styles.menuText}>{option.title}</Text>
+              <Ionicons name="chevron-forward" size={20} color="#E5E7EB" />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* --- BOTÓN CERRAR SESIÓN --- */}
-        <View style={{ paddingHorizontal: 24, marginTop: 16, marginBottom: 32 }}>
-          <TouchableOpacity 
-            onPress={() => navigation.replace('Login')}
-            style={styles.logoutButton}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.logoutText}>Cerrar sesión</Text>
-          </TouchableOpacity>
-        </View>
+        {/* --- CERRAR SESIÓN --- */}
+        <TouchableOpacity 
+          onPress={() => navigation.replace('Login')}
+          style={styles.logoutContainer}
+        >
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
@@ -98,76 +92,133 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.white },
+  safeArea: { flex: 1, backgroundColor: '#F9F9F9' },
+  scrollView: { flex: 1 },
   
-  // Header Banner
-  profileHeader: {
-    backgroundColor: COLORS.primary,
+  // Header Plum Section
+  headerBanner: {
+    backgroundColor: COLORS.ciruela,
+    paddingTop: 20,
+    paddingHorizontal: 25,
+    paddingBottom: 60,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  topIcons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 32,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    marginTop: 30,
+    marginBottom: 30,
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60, // Cambiado a la mitad exacta para un círculo perfecto
+  headerTitle: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: '500',
+    marginTop: 50
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20
+  },
+  initialsAvatar: {
+    width: 85,
+    height: 85,
+    borderRadius: 45,
+    backgroundColor: '#FFD700', // Amarillo del diseño
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.white, // Borde blanco para que resalte sobre el fondo primario
-    marginBottom: 12,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
-  userName: { fontSize: 22, fontWeight: 'bold', color: COLORS.white, marginBottom: 6 },
-  userDetail: { fontSize: 15, color: COLORS.white, marginBottom: 5 },
+  initialsText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.ciruela,
+  },
+  textInfo: {
+    marginLeft: 20,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  userPhone: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+  },
 
-  // Stats Boxes
+  // Stats
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginTop: -20, 
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    marginTop: -35,
+    marginBottom: 25,
   },
   statBox: {
     backgroundColor: COLORS.white,
-    width: '47%',
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  statTitle: { fontSize: 13, color: COLORS.textMedium || '#6B7280', fontWeight: '500', marginTop: 4 },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela, marginVertical: 2 },
-  statLink: { fontSize: 11, color: COLORS.secondary || '#149284', textDecorationLine: 'underline', fontWeight: '600' },
-
-  // Menu List
-  menuContainer: { paddingHorizontal: 24, marginBottom: 16 },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between', // CORREGIDO: de 'between' a 'space-between'
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border || '#E5E7EB',
-  },
-  menuItemLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  menuIcon: { fontSize: 18, marginRight: 12 },
-  menuText: { fontSize: 15, color: COLORS.textDark || '#1F2937', fontWeight: '500' },
-  arrowIcon: { fontSize: 24, color: COLORS.textLight || '#9CA3AF', paddingBottom: 4 },
-
-  // Logout Button
-  logoutButton: {
-    borderWidth: 1.5,
-    borderColor: COLORS.accent || '#EF4444',
-    height: 48,
+    width: '48%',
+    height: 90,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
   },
-  logoutText: { color: COLORS.accent || '#EF4444', fontWeight: 'bold', fontSize: 16 }
+  statNumber: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+
+  // Menu Grouped
+  menuGroup: {
+    backgroundColor: COLORS.white,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    marginBottom: 30,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#1F2937',
+    fontWeight: '400',
+  },
+
+  // Logout
+  logoutContainer: {
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  logoutText: {
+    color: COLORS.accent, // Color ciruela como el texto de la guía
+    fontSize: 18,
+    fontWeight: '500',
+  }
 });

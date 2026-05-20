@@ -17,7 +17,7 @@ export const COLORS = {
   background: '#FFFFFF',    // Fondo general de las pantallas
   surface: '#F7FAFC',       // Gris ultra claro para el fondo de los inputs y contenedores
   white: '#FFFFFF',
-  accent: '#F25F5C',        // Coral para alertas o acciones destructivas (Cerrar sesión)
+  accent: '#f50e0b',        // Coral para alertas o acciones destructivas (Cerrar sesión)
   
   // --- BORDES ---
   border: '#E2E8F0',        // Líneas sutiles divisorias
