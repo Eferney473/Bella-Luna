@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -18,11 +18,21 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   
+  // --- SIMULACIÓN DE ESTADO DE PRÓXIMA CITA ---
+  // Cambia este objeto a 'null' para probar cómo regresa a tu diseño clásico de "Agenda aquí"
+  const [proximaCita, setProximaCita] = useState({
+    id: 'c123',
+    servicio: 'Spa (Baño completo)',
+    mascota: 'Max',
+    fecha: 'Sáb 17 de Mayo',
+    hora: '10:00 AM',
+  });
+
   const servicios = [
     { id: '1', nombre: 'Guardería', sublabel: '5 planes', img: require('../../assets/guarderia11.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
     { id: '2', nombre: 'Spa canino', sublabel: 'Baño · Peluquería', img: require('../../assets/bañito.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '3', nombre: 'Tienda', sublabel: 'Tienda online', img: require('../../assets/petshopin.jpeg'), destino: 'Tienda', params: null },
-    { id: '4', nombre: 'Citas', sublabel: 'Agenda aquí', img: require('../../assets/pase.jpeg'), destino: 'Citas', params: null },
+    { id: '3', nombre: 'Tienda', sublabel: 'Ver ofertas del mes', img: require('../../assets/petshopin.jpeg'), destino: 'Tienda', params: { filter: 'destacados' } }, // Atajo promocional
+    { id: '4', nombre: 'Citas', sublabel: 'Ver ofertas del', img: require('../../assets/pase.jpeg'), destino: 'Citas', params: null },
   ];
 
   const masSolicitados = [
@@ -40,7 +50,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.ciruela} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
@@ -73,7 +83,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.bannerSubTitle}>Servicios y productos pensados para su felicidad</Text>
           </View>
           <Image 
-            source={require('../../assets/perroHome.jpg')} 
+            source={require('../../assets/perroHome1.jpg')} 
             style={styles.bannerImage} 
             resizeMode="contain"
           />
@@ -85,25 +95,52 @@ export default function HomeScreen({ navigation }) {
         </View>
         
         <View style={styles.servicesGrid}>
-          {servicios.map((item) => (
-            <TouchableOpacity 
-              key={item.id} 
-              style={styles.gridCard}
-              onPress={() => handleNavigation(item)}
-              activeOpacity={0.8}
-            >
-              {/* Contenedor de la Imagen: Ocupa todo el ancho superior de la tarjeta */}
-              <View style={styles.gridImageContainer}>
-                <Image source={item.img} style={styles.cardImage} />
-              </View>
-              
-              {/* Bloque de Textos: Margen interno propio abajo de la imagen */}
-              <View style={styles.cardTextContent}>
-                <Text style={styles.gridCardLabel} numberOfLines={1}>{item.nombre}</Text>
-                <Text style={styles.gridCardSubLabel} numberOfLines={1}>{item.sublabel}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {servicios.map((item) => {
+            // INTERCEPCIÓN CON SUPERPODER: Si la tarjeta es Citas y hay una reserva activa
+            if (item.nombre === 'Citas' && proximaCita) {
+              return (
+                <TouchableOpacity 
+                  key={item.id} 
+                  style={[styles.gridCard, styles.gridCardActiveAppointment]}
+                  onPress={() => navigation.navigate('Citas', { citaId: proximaCita.id })}
+                  activeOpacity={0.8}
+                >
+                  {/* Badge superior indicando el estado */}
+                  <View style={styles.appointmentBadge}>
+                    <Ionicons name="sparkles" size={12} color={COLORS.white} />
+                    <Text style={styles.appointmentBadgeText}>Próxima cita</Text>
+                  </View>
+                  
+                  {/* Contenido personalizado inteligente */}
+                  <View style={styles.cardActiveTextContent}>
+                    <Text style={styles.activePetName} numberOfLines={1}>{proximaCita.mascota}</Text>
+                    <Text style={styles.activeServiceLabel} numberOfLines={1}>{proximaCita.servicio}</Text>
+                    <Text style={styles.activeDateLabel} numberOfLines={1}>{proximaCita.fecha}</Text>
+                    <Text style={styles.activeTimeLabel} numberOfLines={1}>{proximaCita.hora}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            }
+
+            // RENDERIZADO ESTÁNDAR (Para Guardería, Spa, Tienda y Citas sin agendar)
+            return (
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.gridCard}
+                onPress={() => handleNavigation(item)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.gridImageContainer}>
+                  <Image source={item.img} style={styles.cardImage} />
+                </View>
+                
+                <View style={styles.cardTextContent}>
+                  <Text style={styles.gridCardLabel} numberOfLines={1}>{item.nombre}</Text>
+                  <Text style={styles.gridCardSubLabel} numberOfLines={1}>{item.sublabel}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* --- SECCIÓN MÁS SOLICITADO --- */}
@@ -163,7 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    height: 110,
+    height: 120,
     marginBottom: 30,
     overflow: 'hidden'
   },
@@ -180,12 +217,11 @@ const styles = StyleSheet.create({
   },
   
   bannerSubTitle: { color: COLORS.white, fontSize: 12, lineHeight: 20, marginTop: 4 },
-  bannerImage: { width: '40%', height: 140, position: 'absolute', right: 0, bottom: -10 },
+  bannerImage: { width: '50%', height: 130, position: 'absolute', right: 0, bottom: -1 },
 
   sectionHeader: { marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.ciruela },
 
-  // Cuadrícula de 2 columnas optimizada para imágenes completas superiores
   servicesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -198,28 +234,56 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E1B01E',
     borderRadius: 16,
-    overflow: 'hidden', // Obliga a la imagen a respetar las esquinas redondeadas de la tarjeta
+    overflow: 'hidden', 
     marginBottom: 12,
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 1.5,
+    minHeight: 148, // Mantiene la simetría perfecta de las tarjetas
   },
+  
+  // --- ESTILOS ADICIONALES PARA LA TARJETA CON CITA ACTIVA ---
+  gridCardActiveAppointment: {
+    borderColor: COLORS.ciruela,
+    borderWidth: 1.5,
+    backgroundColor: '#FAF5FF',
+    justifyContent: 'flex-start',
+  },
+  appointmentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.ciruela,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomRightRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  appointmentBadgeText: { color: COLORS.white, fontSize: 10, fontWeight: 'bold', marginLeft: 3 },
+  cardActiveTextContent: {
+    padding: 10,
+    width: '100%',
+  },
+  activePetName: { fontSize: 16, fontWeight: 'bold', color: COLORS.ciruela, marginBottom: 2 },
+  activeServiceLabel: { fontSize: 12, color: '#4B5563', fontWeight: '500', marginBottom: 6 },
+  activeDateLabel: { fontSize: 11, color: COLORS.primary, fontWeight: 'bold' },
+  activeTimeLabel: { fontSize: 11, color: COLORS.primary, fontWeight: 'bold', marginTop: 1 },
+  // -----------------------------------------------------------
+
   gridImageContainer: {
     width: '100%', 
-    height: 100, // Controla la altura fija que tendrá la imagen dentro de la tarjeta
+    height: 100, 
     backgroundColor: '#F3F4F6',
   },
   cardTextContent: {
     paddingVertical: 10,
     paddingHorizontal: 8,
-    alignItems: 'center', // Alinea los dos textos perfectamente al centro debajo de la imagen
+    alignItems: 'center', 
   },
   gridCardLabel: { fontSize: 14, fontWeight: 'bold', color: COLORS.textDark || '#1F2937', textAlign: 'center', marginBottom: 2 },
   gridCardSubLabel: { fontSize: 11, color: '#9CA3AF', textAlign: 'center' },
 
-  // Sección Más Solicitado
   verticalContainer: {
     marginBottom: 20,
   },

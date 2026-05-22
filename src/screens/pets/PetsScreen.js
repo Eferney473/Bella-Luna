@@ -73,7 +73,7 @@ export default function PetsScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#54D1A3" />
+      <StatusBar barStyle="light-content" backgroundColor='#70C1B3' />
       
       {/* --- HEADER CON FONDO VERDE MENTA (SOLO TÍTULO, SUBTÍTULO Y BOTÓN CIRCULAR) --- */}
       <View style={styles.greenHeader}>
@@ -116,12 +116,12 @@ export default function PetsScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: { 
     flex: 1, 
-    backgroundColor: '#54D1A3' // Mantiene la parte superior del notch del mismo color
+    backgroundColor: '#70C1B3' // Mantiene la parte superior del notch del mismo color
   },
   
   // Header Verde Menta Aislado
   greenHeader: {
-    backgroundColor: '#54D1A3',
+    backgroundColor: '#70C1B3',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
