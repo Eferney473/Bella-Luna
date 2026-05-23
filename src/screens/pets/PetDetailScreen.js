@@ -20,6 +20,7 @@ export default function PetDetailScreen({ route, navigation }) {
   // Si por alguna razón no viene ninguno (por seguridad), cargamos datos por defecto.
   const { mascota } = route.params || {
     mascota: {
+      id: 'default',
       nombre: 'Luna',
       raza: 'Golden Retriever',
       genero: 'Hembra',
@@ -27,12 +28,13 @@ export default function PetDetailScreen({ route, navigation }) {
       fechaNacimiento: '10/05/2021',
       condiciones: 'Ninguna',
       notas: 'Es muy juguetona',
-      img: require('../../assets/perroHome.jpg'), // Fallback seguro
+      bgColor: '#54D1A3',
+      foto: null,
     }
   };
 
-  // Inicializamos el estado de la foto con la imagen que viene directamente en los datos de la mascota
-  const [petPhoto, setPetPhoto] = useState(mascota.img);
+  // Inicializamos el estado de la foto local de documentos si se requiere
+  const [petPhoto, setPetPhoto] = useState(null);
 
   // Función integrada para activar la cámara del celular
   const handleTakeDocumentPhoto = () => {
@@ -61,7 +63,9 @@ export default function PetDetailScreen({ route, navigation }) {
         <Text style={styles.iconPlaceholder}>{icon}</Text>
         <Text style={styles.labelText}>{label}</Text>
       </View>
-      <Text style={[styles.valueText, label === 'Notas' && styles.notesValue]}>{value}</Text>
+      <Text style={[styles.valueText, label === 'Notas' && styles.notesValue]}>
+        {value || 'No especificado'}
+      </Text>
     </View>
   );
 
@@ -72,26 +76,36 @@ export default function PetDetailScreen({ route, navigation }) {
       {/* --- HEADER --- */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={28} color={COLORS.ciruela} />
+          <Ionicons name="chevron-back" size={28} color={COLORS.ciruela || '#4A154B'} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detalle de Mascota</Text>
-        <TouchableOpacity style={styles.editButton} onPress={() => Alert.alert("Editar", "Módulo de edición en desarrollo")}>
-          <Text style={{ fontSize: 15 }}>✏️</Text>
+        <TouchableOpacity 
+          style={styles.editButton} 
+          onPress={() => navigation.navigate('EditPet', { mascota: mascota })}
+        >
+          <Ionicons name="create-outline" size={22} color={COLORS.ciruela || '#4A154B'} />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
-        {/* --- PERFIL MASCOTA DINÁMICO --- */}
+        {/* --- PERFIL MASCOTA DINÁMICO CONTRA ERRORES --- */}
         <View style={styles.profileContainer}>
           <View style={styles.avatarWrapper}>
-            <Image 
-              source={typeof petPhoto === 'number' ? petPhoto : { uri: petPhoto.uri }} 
-              style={styles.avatarImage} 
-            />
+            {mascota.foto ? (
+              <Image 
+                source={{ uri: typeof mascota.foto === 'string' ? mascota.foto : mascota.foto.uri }} 
+                style={styles.petImage} 
+              />
+            ) : (
+              <View style={[styles.petImage, styles.defaultAvatar, { backgroundColor: mascota.bgColor || '#70C1B3' }]}>
+                <Ionicons name="paw" size={60} color={COLORS.white || '#FFFFFF'} />
+              </View>
+            )}
+            
             {/* Botón de cámara estilizado */}
             <TouchableOpacity style={styles.cameraBadge} onPress={handleTakeDocumentPhoto}>
-              <Ionicons name="camera" size={18} color={COLORS.white} />
+              <Ionicons name="camera" size={18} color={COLORS.white || '#FFFFFF'} />
             </TouchableOpacity>
           </View>
           <Text style={styles.petName}>{mascota.nombre}</Text>
@@ -100,11 +114,11 @@ export default function PetDetailScreen({ route, navigation }) {
 
         {/* --- TARJETA UNIFICADA DE INFORMACIÓN DINÁMICA --- */}
         <View style={styles.unifiedCard}>
-          {renderDetailItem('📅', 'Fecha de nacimiento', mascota.fechaNacimiento)}
-          {renderDetailItem(' ⚧', ' Género', mascota.genero)}
+          {renderDetailItem('📅', 'Fecha de nacimiento', mascota.fechaNacimiento || '12/04/2023')}
+          {renderDetailItem('⚧', 'Género', mascota.genero)}
           {renderDetailItem('⚖️', 'Peso', mascota.peso)}
-          {renderDetailItem('🩺', 'Condiciones médicas', mascota.condiciones)}
-          {renderDetailItem('📝', 'Notas', mascota.notas, true)}
+          {renderDetailItem('🩺', 'Condiciones médicas', mascota.condiciones || 'Ninguna')}
+          {renderDetailItem('📝', 'Notas', mascota.notes || mascota.notas || 'Sin notas adicionales', true)}
         </View>
 
       </ScrollView>
@@ -125,9 +139,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#F9F9F6',
   },
-  backButton: { width: 40, justifyContent: 'center', marginTop:50 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela, textAlign: 'center', flex: 1, marginTop:50 },
-  editButton: { width: 40, alignItems: 'flex-end', justifyContent: 'center', marginTop:45},
+  backButton: { width: 40, justifyContent: 'center', marginTop: 50 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela || '#4A154B', textAlign: 'center', flex: 1, marginTop: 50 },
+  editButton: { width: 40, alignItems: 'flex-end', justifyContent: 'center', marginTop: 50 },
 
   // Contenedor de Perfil
   profileContainer: {
@@ -140,11 +154,15 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
   },
-  avatarImage: {
+  petImage: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: COLORS.surface,
+    resizeMode: 'cover',
+  },
+  defaultAvatar: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cameraBadge: {
     position: 'absolute',

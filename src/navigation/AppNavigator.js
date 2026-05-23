@@ -12,7 +12,8 @@ import TabNavigator from './TabNavigator';
 // PANTALLAS DE DETALLE
 import PetDetailScreen from '../screens/pets/PetDetailScreen';
 import ServiceReserveScreen from '../screens/appointments/ServiceReserveScreen';
-// import ShopScreen from '../screens/shop/ShopScreen';
+import OfertasScreen from '../screens/shop/OfertasScreen'
+import EditPetScreen from '../screens/pets/EditPetScreen';
 
 
 const Stack = createStackNavigator();
@@ -34,7 +35,12 @@ export default function AppNavigator() {
 
       {/* Pantalla genérica o específica para agendar Guardería, Spa o Paseos */}
       <Stack.Screen name="ReservarServicio" component={ServiceReserveScreen} />
-      {/* <Stack.Screen name="Tienda" component={ShopScreen} /> */}
+
+      {/* Pantalla exclusiva para mostrar ofertas del mes en la tienda */}
+      <Stack.Screen name="Ofertas" component={OfertasScreen} />
+
+      {/* Pantalla para editar los datos de la mascota */}
+      <Stack.Screen name="EditPet" component={EditPetScreen} />
       
     </Stack.Navigator>
   );

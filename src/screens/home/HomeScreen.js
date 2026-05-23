@@ -31,7 +31,7 @@ export default function HomeScreen({ navigation }) {
   const servicios = [
     { id: '1', nombre: 'Guardería', sublabel: '5 planes', img: require('../../assets/guarderia11.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
     { id: '2', nombre: 'Spa canino', sublabel: 'Baño · Peluquería', img: require('../../assets/bañito.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '3', nombre: 'Tienda', sublabel: 'Ver ofertas del mes', img: require('../../assets/petshopin.jpeg'), destino: 'Tienda', params: { filter: 'destacados' } }, // Atajo promocional
+    { id: '3', nombre: 'Ofertas del mes', sublabel: 'Descuentos exclusivos', img: require('../../assets/petshopin.jpeg'), destino: 'Ofertas', params: { filter: 'destacados' } }, // Atajo promocional
     { id: '4', nombre: 'Citas', sublabel: 'Ver ofertas del', img: require('../../assets/pase.jpeg'), destino: 'Citas', params: null },
   ];
 
