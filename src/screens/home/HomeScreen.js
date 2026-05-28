@@ -8,18 +8,18 @@ import {
   ScrollView, 
   TouchableOpacity, 
   StyleSheet, 
-  Dimensions 
+  Dimensions,
+  Modal
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import HeartIcon from '../../assets/heart-icon';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   
   // --- SIMULACIÓN DE ESTADO DE PRÓXIMA CITA ---
-  // Cambia este objeto a 'null' para probar cómo regresa a tu diseño clásico de "Agenda aquí"
   const [proximaCita, setProximaCita] = useState({
     id: 'c123',
     servicio: 'Spa (Baño completo)',
@@ -28,20 +28,52 @@ export default function HomeScreen({ navigation }) {
     hora: '10:00 AM',
   });
 
+  // --- ESTADOS PARA CONTROLAR EL MODAL DEL COLLAGE ---
+  const [modalVisible, setModalVisible] = useState(false);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
+
+  // --- BANCO DE IMÁGENES PARA LOS COLLAGES ---
+  // Nota: Reemplaza estos placeholders o require por tus imágenes reales en assets
+  const galerias = {
+    'Baño completo': {
+      titulo: 'Spa & Baño Completo',
+      descripcion: 'Higiene profunda, hidratación de pelaje y mimos garantizados.',
+      imagenes: [
+        require('../../assets/baño1.jpeg'), // Imagen principal
+        require('../../assets/baño2.jpeg'), 
+        require('../../assets/baño3.jpeg'), 
+      ]
+    },
+    'Mañanas de parque': {
+      titulo: 'Mañanas de Parque',
+      descripcion: 'Socialización, juegos al aire libre y monitoreo profesional de energía.',
+      imagenes: [
+        require('../../assets//paseo1.jpeg'), // Imagen principal
+        require('../../assets/paseo2.jpeg'),
+        require('../../assets/paseo3.jpeg'),
+      ]
+    }
+  };
+
   const servicios = [
     { id: '1', nombre: 'Guardería', sublabel: '5 planes', img: require('../../assets/guarderia11.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
     { id: '2', nombre: 'Spa canino', sublabel: 'Baño · Peluquería', img: require('../../assets/bañito.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '3', nombre: 'Ofertas del mes', sublabel: 'Descuentos exclusivos', img: require('../../assets/petshopin.jpeg'), destino: 'Ofertas', params: { filter: 'destacados' } }, // Atajo promocional
+    { id: '3', nombre: 'Ofertas del mes', sublabel: 'Descuentos exclusivos', img: require('../../assets/petshopin.jpeg'), destino: 'Ofertas', params: { filter: 'destacados' } },
     { id: '4', nombre: 'Citas', sublabel: 'Ver ofertas del', img: require('../../assets/pase.jpeg'), destino: 'Citas', params: null },
   ];
 
   const masSolicitados = [
-    { id: '1', nombre: 'Baño completo', detalle: 'Spa canino · desde $45.000', tag: 'Popular', colorTag: '#FAF5FF', textTag: '#7C3AED', img: require('../../assets/baños.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Spa' } },
-    { id: '2', nombre: 'Mañanas de parque', detalle: 'Guardería · 9am–1pm', tag: 'Nuevo', colorTag: '#E6F4EA', textTag: '#137333', img: require('../../assets/guarde.jpeg'), destino: 'ReservarServicio', params: { servicio: 'Guardería' } },
+    { id: '1', nombre: 'Baño completo', detalle: 'Spa canino · desde $45.000', tag: 'Popular', colorTag: '#FAF5FF', textTag: '#7C3AED', img: require('../../assets/baños.jpeg'), esCollage: true },
+    { id: '2', nombre: 'Mañanas de parque', detalle: 'Guardería · 9am–1pm', tag: 'Nuevo', colorTag: '#E6F4EA', textTag: '#137333', img: require('../../assets/guarde.jpeg'), esCollage: true },
   ];
 
-  const handleNavigation = (item) => {
-    if (item.params) {
+  // Manejador inteligente de clicks
+  const handleItemPress = (item) => {
+    if (item.esCollage) {
+      // Si la tarjeta está configurada para mostrar collage, abrimos el modal dinámico
+      setServicioSeleccionado(galerias[item.nombre]);
+      setModalVisible(true);
+    } else if (item.params) {
       navigation.navigate(item.destino, item.params);
     } else {
       navigation.navigate(item.destino);
@@ -50,7 +82,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.ciruela} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
@@ -96,7 +128,6 @@ export default function HomeScreen({ navigation }) {
         
         <View style={styles.servicesGrid}>
           {servicios.map((item) => {
-            // INTERCEPCIÓN CON SUPERPODER: Si la tarjeta es Citas y hay una reserva activa
             if (item.nombre === 'Citas' && proximaCita) {
               return (
                 <TouchableOpacity 
@@ -105,13 +136,11 @@ export default function HomeScreen({ navigation }) {
                   onPress={() => navigation.navigate('Citas', { citaId: proximaCita.id })}
                   activeOpacity={0.8}
                 >
-                  {/* Badge superior indicando el estado */}
                   <View style={styles.appointmentBadge}>
                     <Ionicons name="sparkles" size={12} color={COLORS.white} />
                     <Text style={styles.appointmentBadgeText}>Próxima cita</Text>
                   </View>
                   
-                  {/* Contenido personalizado inteligente */}
                   <View style={styles.cardActiveTextContent}>
                     <Text style={styles.activePetName} numberOfLines={1}>{proximaCita.mascota}</Text>
                     <Text style={styles.activeServiceLabel} numberOfLines={1}>{proximaCita.servicio}</Text>
@@ -122,12 +151,11 @@ export default function HomeScreen({ navigation }) {
               );
             }
 
-            // RENDERIZADO ESTÁNDAR (Para Guardería, Spa, Tienda y Citas sin agendar)
             return (
               <TouchableOpacity 
                 key={item.id} 
                 style={styles.gridCard}
-                onPress={() => handleNavigation(item)}
+                onPress={() => handleItemPress(item)}
                 activeOpacity={0.8}
               >
                 <View style={styles.gridImageContainer}>
@@ -153,7 +181,7 @@ export default function HomeScreen({ navigation }) {
             <TouchableOpacity 
               key={item.id} 
               style={styles.verticalRowCard}
-              onPress={() => handleNavigation(item)}
+              onPress={() => handleItemPress(item)}
               activeOpacity={0.8}
             >
               <View style={styles.verticalImageContainer}>
@@ -173,6 +201,51 @@ export default function HomeScreen({ navigation }) {
         </View>
 
       </ScrollView>
+
+      {/* --- MODAL DE COLLAGE INTERACTIVO (INSPIRACIONAL Y LIMPIO) --- */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            
+            {/* Barra de arrastre visual superior */}
+            <View style={styles.dragIndicator} />
+            
+            {/* Botón Cerrar */}
+            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Ionicons name="close-circle" size={30} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            {servicioSeleccionado && (
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScroll}>
+                <Text style={styles.modalTitle}>{servicioSeleccionado.titulo}</Text>
+                <Text style={styles.modalDescription}>{servicioSeleccionado.descripcion}</Text>
+
+                {/* --- MOSAICO TIPO PINTEREST / COLLAGE --- */}
+                <View style={styles.collageGrid}>
+                  {/* Bloque Izquierdo (Imagen Vertical Grande) */}
+                  <View style={styles.collageLeftColumn}>
+                    <Image source={servicioSeleccionado.imagenes[0]} style={styles.collageBigImage} />
+                  </View>
+
+                  {/* Bloque Derecho (Dos imágenes cuadradas apiladas) */}
+                  <View style={styles.collageRightColumn}>
+                    <Image source={servicioSeleccionado.imagenes[1]} style={styles.collageSmallImage} />
+                    <Image source={servicioSeleccionado.imagenes[2]} style={styles.collageSmallImage} />
+                  </View>
+                </View>
+
+                {/* Imagen Panorámica Inferior de Cierre */}
+                <Image source={servicioSeleccionado.imagenes[3]} style={styles.collageWideImage} />
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -191,7 +264,7 @@ const styles = StyleSheet.create({
   },
   welcomeText: { fontSize: 20, fontWeight: 'bold', color: COLORS.ciruela, flex: 1 },
   headerLogo: { width: 120, height: 60, flex: 1, marginTop: 20, color: COLORS.ciruela, },
-  notificationButton: { width: 40, alignItems: 'flex-end', flex: 0.5,  },
+  notificationButton: { width: 40, alignItems: 'flex-end', flex: 0.5 },
 
   banner: {
     backgroundColor: COLORS.primary,
@@ -241,10 +314,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 1.5,
-    minHeight: 148, // Mantiene la simetría perfecta de las tarjetas
+    minHeight: 148,
   },
   
-  // --- ESTILOS ADICIONALES PARA LA TARJETA CON CITA ACTIVA ---
   gridCardActiveAppointment: {
     borderColor: COLORS.ciruela,
     borderWidth: 1.5,
@@ -269,7 +341,6 @@ const styles = StyleSheet.create({
   activeServiceLabel: { fontSize: 12, color: '#4B5563', fontWeight: '500', marginBottom: 6 },
   activeDateLabel: { fontSize: 11, color: COLORS.primary, fontWeight: 'bold' },
   activeTimeLabel: { fontSize: 11, color: COLORS.primary, fontWeight: 'bold', marginTop: 1 },
-  // -----------------------------------------------------------
 
   gridImageContainer: {
     width: '100%', 
@@ -322,6 +393,104 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tagBadgeText: { fontSize: 10, fontWeight: 'bold' },
+  cardImage: { width: '100%', height: '100%', resizeMode: 'cover' },
 
-  cardImage: { width: '100%', height: '100%', resizeMode: 'cover' }
+  // --- ESTILOS DEL MODAL DE COLLAGE ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Fondo oscuro translúcido premium
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: height * 0.85, // Máximo 85% de la pantalla para comodidad
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+  dragIndicator: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    zIndex: 10,
+  },
+  modalScroll: {
+    paddingTop: 10,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.ciruela,
+    marginBottom: 8,
+  },
+  modalDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  // Rejilla estructural estilo Mosaico
+  collageGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 240,
+    marginBottom: 12,
+  },
+  collageLeftColumn: {
+    width: '48%',
+    height: '100%',
+  },
+  collageBigImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    resizeMode: 'cover',
+  },
+  collageRightColumn: {
+    width: '48%',
+    justifyContent: 'space-between',
+    height: '100%',
+  },
+  collageSmallImage: {
+    width: '100%',
+    height: '114%',
+    maxHeight: 114,
+    borderRadius: 16,
+    resizeMode: 'cover',
+  },
+  collageWideImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 16,
+    resizeMode: 'cover',
+    marginBottom: 25,
+  },
+  bookServiceButton: {
+    backgroundColor: COLORS.primary || '#149284',
+    paddingVertical: 15,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  bookServiceButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

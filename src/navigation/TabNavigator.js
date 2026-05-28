@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { COLORS } from '../theme/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// Importación de pantallas basándonos en la estructura real de tus carpetas
+// Importación de tus pantallas reales
 import HomeScreen from '../screens/home/HomeScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import PetsScreen from '../screens/pets/PetsScreen';
@@ -16,9 +16,9 @@ export default function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false, // Ocultamos el header por defecto para usar tus headers personalizados
-        tabBarActiveTintColor: COLORS.primary || '#149284', // Verde turquesa del mockup cuando está activo
-        tabBarInactiveTintColor: '#9CA3AF', // Gris cuando está inactivo
+        headerShown: false, 
+        tabBarActiveTintColor: COLORS.primary || '#149284', 
+        tabBarInactiveTintColor: '#9CA3AF', 
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0.5,
@@ -31,22 +31,23 @@ export default function TabNavigator() {
           fontSize: 12,
           fontWeight: '700',
         },
-        // Mapeo dinámico de iconos según tu mockup original
+        // CORRECCIÓN SINTÁCTICA AQUÍ: Definimos de forma limpia la lógica del icono
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+          let iconName = 'paw'; // Icono por defecto en caso de fallo
 
           if (route.name === 'Inicio') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Perfil') {
             iconName = focused ? 'person' : 'person-outline';
           } else if (route.name === 'Mascotas') {
-            iconName = focused ? 'paw' : 'paw-outline'; // Icono de la patita central
+            iconName = focused ? 'paw' : 'paw-outline'; 
           } else if (route.name === 'Citas') {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Tienda') {
             iconName = focused ? 'cart' : 'cart-outline';
           }
 
+          // Retornamos explícitamente el componente de Ionicons
           return <Ionicons name={iconName} size={24} color={color} />;
         },
       })}

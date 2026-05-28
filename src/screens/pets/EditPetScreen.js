@@ -1,60 +1,67 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  SafeAreaView, 
-  StatusBar, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
   Platform,
   Image,
-  Alert
+  Alert,
 } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 export default function EditPetScreen({ route, navigation }) {
-  // Recibimos la data de la mascota que viene desde la lista
-  const { mascota } = route.params;
+  const { mascota, onMascotaEditada } = route.params;
 
-  // Estados locales para los inputs del formulario
   const [nombre, setNombre] = useState(mascota.nombre);
   const [raza, setRaza] = useState(mascota.raza);
   const [edad, setEdad] = useState(mascota.edad);
   const [genero, setGenero] = useState(mascota.genero);
   const [peso, setPeso] = useState(mascota.peso);
   const [foto, setFoto] = useState(mascota.foto);
+  
+  // Nuevos estados agregados para los detalles faltantes
+  const [fechaNacimiento, setFechaNacimiento] = useState(mascota.fechaNacimiento || '');
+  const [condiciones, setCondiciones] = useState(mascota.condiciones || '');
+  const [notas, setNotas] = useState(mascota.notes || mascota.notas || '');
 
-  // Función para cambiar o actualizar la foto desde esta pantalla
   const handleChangeFoto = () => {
     const opciones = { mediaType: 'photo', quality: 0.8 };
-    Alert.alert(
-      "Actualizar foto",
-      "Selecciona una opción:",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Tomar Foto", 
-          onPress: () => launchCamera(opciones, res => !res.didCancel && setFoto(res.assets[0].uri)) 
-        },
-        { 
-          text: "Elegir de Galería", 
-          onPress: () => launchImageLibrary(opciones, res => !res.didCancel && setFoto(res.assets[0].uri)) 
-        }
-      ]
-    );
+    Alert.alert('Actualizar foto', 'Selecciona una opción:', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Tomar Foto',
+        onPress: () =>
+          launchCamera(opciones, (res) => {
+            if (!res.didCancel && res.assets) {
+              setFoto(res.assets[0].uri);
+            }
+          }),
+      },
+      {
+        text: 'Elegir de Galería',
+        onPress: () =>
+          launchImageLibrary(opciones, (res) => {
+            if (!res.didCancel && res.assets) {
+              setFoto(res.assets[0].uri);
+            }
+          }),
+      },
+    ]);
   };
 
   const handleGuardarCambios = () => {
     if (!nombre || !raza) {
-      Alert.alert("Campos vacíos", "Por favor completa al menos el nombre y la raza.");
+      Alert.alert('Campos vacíos', 'Por favor completa al menos el nombre y la raza.');
       return;
     }
 
-    // Aquí empaquetamos el objeto editado completo
     const mascotaEditada = {
       ...mascota,
       nombre,
@@ -62,88 +69,152 @@ export default function EditPetScreen({ route, navigation }) {
       edad,
       genero,
       peso,
-      foto
+      foto,
+      fechaNacimiento,
+      condiciones,
+      notas,
     };
 
-    // SOLUCIÓN: Enviamos el parámetro de vuelta a la ruta contenedora activa 'Home'
-    // y le especificamos que los reciba la pestaña que corresponda.
-    Alert.alert("¡Éxito!", "Cambios guardados correctamente.", [
-      { 
-        text: "OK", 
+    Alert.alert('¡Éxito!', 'Cambios guardados correctamente.', [
+      {
+        text: 'OK',
         onPress: () => {
-          navigation.navigate('Home', {
-            screen: 'Mascotas', // Asegúrate de que este nombre coincida con el nombre exacto de la pestaña en tu TabNavigator
-            params: { mascotaModificada: mascotaEditada },
-          });
-        } 
-      }
+          if (onMascotaEditada) {
+            onMascotaEditada(mascotaEditada);
+          }
+          navigation.navigate('DetalleMascota', { mascota: mascotaEditada });
+        },
+      },
     ]);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor='#70C1B3' />
-      
-      {/* HEADER DE EDICIÓN */}
+      <StatusBar barStyle="light-content" backgroundColor="#70C1B3" />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+          <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Editar Perfil</Text>
-        <View style={{ width: 40 }} /> {/* Dummy para centrar el título */}
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* SECCIÓN DE FOTO */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity style={[styles.avatarContainer, { backgroundColor: mascota.bgColor }]} onPress={handleChangeFoto}>
+          <TouchableOpacity
+            style={[styles.avatarContainer, { backgroundColor: mascota.bgColor }]}
+            onPress={handleChangeFoto}
+          >
             {foto ? (
               <Image source={{ uri: foto }} style={styles.avatarImage} />
             ) : (
-              <Ionicons name="paw" size={45} color={COLORS.white} />
+              <Ionicons name="paw" size={45} color="#FFF" />
             )}
             <View style={styles.cameraIconBadge}>
-              <Ionicons name="camera" size={16} color={COLORS.white} />
+              <Ionicons name="camera" size={16} color="#FFF" />
             </View>
           </TouchableOpacity>
           <Text style={styles.avatarHelpText}>Toca para cambiar la foto</Text>
         </View>
 
-        {/* FORMULARIO */}
         <View style={styles.form}>
           <Text style={styles.label}>Nombre de la mascota</Text>
-          <TextInput style={styles.input} value={nombre} onChangeText={setNombre} placeholder="Ej. Max" />
+          <TextInput
+            style={styles.input}
+            value={nombre}
+            onChangeText={setNombre}
+            placeholder="Nombre"
+            placeholderTextColor="#9CA3AF"
+          />
 
           <Text style={styles.label}>Raza / Especie</Text>
-          <TextInput style={styles.input} value={raza} onChangeText={setRaza} placeholder="Ej. Golden Retriever" />
+          <TextInput
+            style={styles.input}
+            value={raza}
+            onChangeText={setRaza}
+            placeholder="Raza o especie"
+            placeholderTextColor="#9CA3AF"
+          />
 
           <View style={styles.row}>
             <View style={styles.flex1}>
               <Text style={styles.label}>Edad</Text>
-              <TextInput style={styles.input} value={edad} onChangeText={setEdad} placeholder="Ej. 3 años" />
+              <TextInput
+                style={styles.input}
+                value={edad}
+                onChangeText={setEdad}
+                placeholder="Ej: 2 años"
+                placeholderTextColor="#9CA3AF"
+              />
             </View>
             <View style={[styles.flex1, { marginLeft: 12 }]}>
               <Text style={styles.label}>Peso</Text>
-              <TextInput style={styles.input} value={peso} onChangeText={setPeso} placeholder="Ej. 25 kg" />
+              <TextInput
+                style={styles.input}
+                value={peso}
+                onChangeText={(text) => setPeso(text)}
+                placeholder="Ej: 10 kg"
+                placeholderTextColor="#9CA3AF"
+              />
             </View>
           </View>
 
           <Text style={styles.label}>Género</Text>
           <View style={styles.genderContainer}>
-            {['Macho', 'Hembra'].map(g => (
-              <TouchableOpacity 
-                key={g} 
+            {['Macho', 'Hembra'].map((g) => (
+              <TouchableOpacity
+                key={g}
                 style={[styles.genderButton, genero === g && styles.genderButtonActive]}
                 onPress={() => setGenero(g)}
               >
-                <Text style={[styles.genderButtonText, genero === g && styles.genderButtonTextActive]}>{g}</Text>
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    genero === g && styles.genderButtonTextActive,
+                  ]}
+                >
+                  {g}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* NUEVOS CAMPOS DEL FORMULARIO CONECTADOS */}
+          <Text style={styles.label}>Fecha de nacimiento</Text>
+          <TextInput
+            style={styles.input}
+            value={fechaNacimiento}
+            onChangeText={setFechaNacimiento}
+            placeholder="Ej: 12/04/2023"
+            placeholderTextColor="#9CA3AF"
+          />
+
+          <Text style={styles.label}>Condiciones médicas</Text>
+          <TextInput
+            style={styles.input}
+            value={condiciones}
+            onChangeText={setCondiciones}
+            placeholder="Ej: Alergias, tratamientos, ninguna"
+            placeholderTextColor="#9CA3AF"
+          />
+
+          <Text style={styles.label}>Notas adicionales</Text>
+          <TextInput
+            style={[styles.input, { minHeight: 60, textAlignVertical: 'top' }]}
+            value={notas}
+            onChangeText={setNotas}
+            placeholder="Escribe detalles importantes sobre tu mascota..."
+            placeholderTextColor="#9CA3AF"
+            multiline={true}
+          />
         </View>
 
-        {/* BOTÓN GUARDAR */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleGuardarCambios} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleGuardarCambios}
+          activeOpacity={0.8}
+        >
           <Text style={styles.saveButtonText}>Guardar Cambios</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -162,23 +233,76 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   backButton: { padding: 8 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.white },
-  content: { flex: 1, backgroundColor: '#FFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 24 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#FFF' },
+  content: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 24,
+  },
   avatarSection: { alignItems: 'center', marginTop: 25, marginBottom: 20 },
-  avatarContainer: { width: 100, height: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden' },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
   avatarImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  cameraIconBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: COLORS.ciruela, width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF' },
+  cameraIconBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#4A154B',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
   avatarHelpText: { fontSize: 12, color: '#9CA3AF', marginTop: 8, fontWeight: '500' },
   form: { marginTop: 10 },
-  label: { fontSize: 13, fontWeight: '700', color: COLORS.ciruela, marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: Platform.OS === 'ios' ? 14 : 10, fontSize: 15, color: '#1F2937' },
+  label: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#4A154B',
+    marginBottom: 6,
+    marginTop: 16,
+  },
+  input: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+    fontSize: 15,
+    color: '#1F2937',
+  },
   row: { flexDirection: 'row' },
   flex1: { flex: 1 },
   genderContainer: { flexDirection: 'row', marginTop: 4 },
-  genderButton: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12, backgroundColor: '#F3F4F6', marginRight: 8 },
-  genderButtonActive: { backgroundColor: COLORS.ciruela },
+  genderButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 12,
+    backgroundColor: '#F3F4F6',
+    marginRight: 8,
+  },
+  genderButtonActive: { backgroundColor: '#4A154B' },
   genderButtonText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
   genderButtonTextActive: { color: '#FFF' },
-  saveButton: { backgroundColor: '#70C1B3', borderRadius: 16, paddingVertical: 14, alignItems: 'center', marginTop: 35, marginBottom: 40 },
-  saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' }
+  saveButton: {
+    backgroundColor: '#70C1B3',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 35,
+    marginBottom: 40,
+  },
+  saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
 });

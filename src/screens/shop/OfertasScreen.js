@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   whiteBodyContainer: { flex: 1, backgroundColor: '#F9F9F9', borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: 'hidden' },
   scrollContainer: { paddingHorizontal: 20, paddingTop: 25, paddingBottom: 30 },
   introOfertasText: { fontSize: 14, color: '#4B5563', lineHeight: 20, marginBottom: 20, fontWeight: '500' },
-  productRowCard: { backgroundColor: '#FFF', borderRadius: 18, borderWidth: 1, borderColor: '#ECECE7', flexDirection: 'row', padding: 12, marginBottom: 12, alignItems: 'center', borderColor: '#FFC816', borderWidth: 1.5 },
+  productRowCard: { backgroundColor: '#FFF', borderRadius: 18, flexDirection: 'row', padding: 12, marginBottom: 12, alignItems: 'center', borderColor: '#FFC816', borderWidth: 1 },
   productImagePlaceholder: { width: 55, height: 55, borderRadius: 14, position: 'relative' },
   discountBadge: { backgroundColor: '#E74C3C', paddingHorizontal: 5, paddingVertical: 2, borderRadius: 6, position: 'absolute', bottom: -4, right: -4 },
   discountBadgeText: { color: '#FFF', fontSize: 9, fontWeight: 'bold' },
