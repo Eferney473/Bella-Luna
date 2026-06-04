@@ -1,55 +1,71 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { SplashScreen } from '../screens/auth/SplashScreen';
-import { LoginScreen } from '../screens/auth/LoginScreen';
-import { RegisterScreen } from '../screens/auth/RegisterScreen';
-import { HomeScreen } from '../screens/home/HomeScreen';
+// Importaciones de pantallas con rutas físicas reales .js
+import SplashScreen from '../screens/auth/SplashScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
+import HomeScreen from '../screens/home/HomeScreen';
+import PetsScreen from '../screens/pets/PetsScreen';
+import AppointmentsScreen from '../screens/appointments/AppointmentsScreen';
+import StoreScreen from '../screens/store/StoreScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import AddPetScreen from '../screens/pets/AddPetScreen';
+
 import { COLORS } from '../config/colors';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Menu de pestañas inferiores (Tab Bar)
-const HomeTabs = () => {
+function HomeTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,
-        tabBarStyle: { height: 60, paddingBottom: 8 },
-        tabBarIcon: ({ color, size }) => {
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginBottom: 2 },
+        tabBarStyle: { backgroundColor: COLORS.white },
+        tabBarIcon: ({ color, size, focused }) => {
           let iconName;
-          if (route.name === 'Inicio') iconName = 'home';
-          else if (route.name === 'Perfil') iconName = 'user';
-          else if (route.name === 'Mascotas') iconName = 'github'; // O cualquier icon de huella
-          else if (route.name === 'Citas') iconName = 'calendar';
-          else if (route.name === 'Tienda') iconName = 'shopping-cart';
+          if (route.name === 'Inicio') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Perfil') iconName = focused ? 'account' : 'account-outline';
+          else if (route.name === 'Mascotas') iconName = focused ? 'paw' : 'paw-outline';
+          else if (route.name === 'Citas') iconName = focused ? 'calendar-month' : 'calendar-month-outline';
+          else if (route.name === 'Tienda') iconName = focused ? 'shopping' : 'shopping-outline';
 
-          return <Feather name={iconName} size={size} color={color} />;
+          return <MaterialCommunityIcons name={iconName} size={size + 2} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Inicio" component={HomeScreen} />
-      <Tab.Screen name="Perfil" component={HomeScreen} /> 
-      <Tab.Screen name="Mascotas" component={HomeScreen} />
-      <Tab.Screen name="Citas" component={HomeScreen} />
-      <Tab.Screen name="Tienda" component={HomeScreen} />
+      <Tab.Screen name="Perfil" component={ProfileScreen} />
+      <Tab.Screen name="Mascotas" component={PetsScreen} />
+      <Tab.Screen name="Citas" component={AppointmentsScreen} />
+      <Tab.Screen name="Tienda" component={StoreScreen} />
     </Tab.Navigator>
   );
-};
+}
 
-// Stack principal
-export const AuthNavigator = () => {
+export default function AuthNavigator({ user }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="HomeTabs" component={HomeTabs} />
+      {user ? (
+        <>
+          <Stack.Screen name="HomeTabs" component={HomeTabs} />
+          <Stack.Screen name="AddPet" component={AddPetScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="HomeTabs" component={HomeTabs} /> 
+          <Stack.Screen name="AddPet" component={AddPetScreen} />
+        </>
+      )}
     </Stack.Navigator>
   );
-};
+}

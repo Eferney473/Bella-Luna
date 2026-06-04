@@ -4,10 +4,29 @@ import { COLORS } from '../../config/colors';
 import { CustomInput } from '../../components/CustomInput';
 import { CustomButton } from '../../components/CustomButton';
 
+import { FirebaseService } from '../../config/firebaseService';
+
 export const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // Estado para el spinner del botón
 
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Por favor rellena todos los campos.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await FirebaseService.loginUser(email, password);
+      // Al loguearse con éxito, el Listener global en App.jsx nos cambiará de pantalla automáticamente
+    } catch (e) {
+      // El error ya es manejado en el servicio
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
@@ -41,8 +60,9 @@ export const LoginScreen = ({ navigation }) => {
 
           <CustomButton 
             title="Iniciar Sesión" 
-            onPress={() => navigation.navigate('HomeTabs')} 
+            onPress={handleLogin} 
             variant="secondary" 
+            loading={loading}
             style={styles.loginBtn}
           />
         </View>

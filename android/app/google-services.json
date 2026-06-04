@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "606819084269",
+    "project_id": "bella-luna-a9e36",
+    "storage_bucket": "bella-luna-a9e36.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:606819084269:android:72c601ab13d804adf9e9e4",
+        "android_client_info": {
+          "package_name": "com.bellaluna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqEb896ogdiT4aYpwRs3YffnOXhlLzYsI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

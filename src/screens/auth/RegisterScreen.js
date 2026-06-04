@@ -4,12 +4,32 @@ import { COLORS } from '../../config/colors';
 import { CustomInput } from '../../components/CustomInput';
 import { CustomButton } from '../../components/CustomButton';
 
+import { FirebaseService } from '../../config/firebaseService';
+
 export const RegisterScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  const handleRegister = async () => {
+    if (!name || !email || !phone || !password) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await FirebaseService.registerUser(name, phone, email, password);
+      alert("¡Cuenta creada con éxito!");
+      navigation.navigate('Login');
+    } catch (e) {
+      // Manejado en el servicio
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* Cabecera curva */}
@@ -54,8 +74,9 @@ export const RegisterScreen = ({ navigation }) => {
 
           <CustomButton 
             title="Registrarme Ahora" 
-            onPress={() => {}} 
+            onPress={handleRegister} 
             variant="secondary" 
+            loading={loading}
             style={styles.registerBtn}
           />
 
