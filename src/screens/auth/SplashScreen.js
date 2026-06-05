@@ -3,7 +3,7 @@ import { View, StyleSheet, StatusBar } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'; // Usamos la huella de FontAwesome
 import { COLORS } from '../../config/colors';
 
-export const SplashScreen = ({ navigation }) => {
+export default function SplashScreen({ navigation }) {
   useEffect(() => {
     setTimeout(() => {
       navigation.replace('Login');
@@ -13,11 +13,10 @@ export const SplashScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
-      {/* Icono de huella grande centrado */}
       <FontAwesome5 name="paw" size={250} color={COLORS.oro} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

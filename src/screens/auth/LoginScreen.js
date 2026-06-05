@@ -6,11 +6,11 @@ import { CustomButton } from '../../components/CustomButton';
 
 import { FirebaseService } from '../../config/firebaseService';
 
-export const LoginScreen = ({ navigation }) => {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false); // Estado para el spinner del botón
-
+  const [loading, setLoading] = useState(false);
+  
   const handleLogin = async () => {
     if (!email || !password) {
       alert("Por favor rellena todos los campos.");

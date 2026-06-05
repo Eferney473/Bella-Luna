@@ -6,7 +6,7 @@ import { CustomButton } from '../../components/CustomButton';
 
 import { FirebaseService } from '../../config/firebaseService';
 
-export const RegisterScreen = ({ navigation }) => {
+export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');

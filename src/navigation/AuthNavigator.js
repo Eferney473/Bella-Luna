@@ -3,16 +3,17 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Importaciones de pantallas con rutas físicas reales .js
+// Importaciones corregidas por defecto (Todas cargan perfecto ahora)
 import SplashScreen from '../screens/auth/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import HomeScreen from '../screens/home/HomeScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
 import PetsScreen from '../screens/pets/PetsScreen';
 import AppointmentsScreen from '../screens/appointments/AppointmentsScreen';
 import StoreScreen from '../screens/store/StoreScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
 import AddPetScreen from '../screens/pets/AddPetScreen';
+import BookAppointmentScreen from '../screens/appointments/BookAppointmentScreen';
 
 import { COLORS } from '../config/colors';
 
@@ -53,17 +54,18 @@ export default function AuthNavigator({ user }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
+        // Flujo Privado de la Aplicación
         <>
           <Stack.Screen name="HomeTabs" component={HomeTabs} />
           <Stack.Screen name="AddPet" component={AddPetScreen} />
+          <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
         </>
       ) : (
+        // Flujo de Autenticación (Público)
         <>
           <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="HomeTabs" component={HomeTabs} /> 
-          <Stack.Screen name="AddPet" component={AddPetScreen} />
         </>
       )}
     </Stack.Navigator>
