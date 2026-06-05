@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Image, Platform, ActivityIndicator, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Platform, ActivityIndicator, StatusBar } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firestore from '@react-native-firebase/firestore';
 import { COLORS } from '../../config/colors';
+import { useCart } from '../../context/CartContext'; // Contexto global activo
 
-export default function ShopScreen({ navigation }) {
+export default function StoreScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cartCount, setCartCount] = useState(2); // Valor estático inicial como en la imagen reference
 
-  // Categorías fijas reflejadas exactamente como en image_a882fe.png
+  // Traemos el conteo y la acción de agregar del contexto global
+  const { cartCount, addToCart } = useCart(); 
+
   const categories = [
     { id: 'alimentos', title: 'Alimentos', subtitle: 'Concentrado · Snacks', icon: 'bone', color: '#3182CE' },
     { id: 'juguetes', title: 'Juguetes', subtitle: 'Accesorios', icon: 'tennisball', color: '#D69E2E' },
@@ -20,7 +22,6 @@ export default function ShopScreen({ navigation }) {
   ];
 
   useEffect(() => {
-    // Consulta en tiempo real de los productos destacados de la tienda
     const unsubscribe = firestore()
       .collection('products')
       .onSnapshot(querySnapshot => {
@@ -30,10 +31,9 @@ export default function ShopScreen({ navigation }) {
             productsList.push({ id: doc.id, ...doc.data() });
           });
         } else {
-          // Fallback local simulado idéntico a la captura si Firestore está vacío provisionalmente
           productsList.push(
-            { id: 'f1', name: 'Concentrado a granel', category: 'alimentos', price: '$8.500/kg', subText: 'Alimentos · por kg' },
-            { id: 'f2', name: 'Antipulgas pipeta', category: 'antiparasitarios', price: '$25.000', subText: 'Antiparasitarios' }
+            { id: 'f1', name: 'Concentrado a granel', category: 'alimentos', price: 8500, subText: 'Alimentos · por kg' },
+            { id: 'f2', name: 'Antipulgas pipeta', category: 'antiparasitarios', price: 25000, subText: 'Antiparasitarios' }
           );
         }
         setProducts(productsList);
@@ -46,24 +46,25 @@ export default function ShopScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
-  // Filtrado reactivo en barra de búsqueda
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
     (!selectedCategory || product.category === selectedCategory)
   );
 
+  const formatCurrency = (value) => {
+    return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor={COLORS.ciruela || '#5A344E'} barStyle="light-content" />
       
-      {/* HEADER SUPERIOR OSCURO */}
       <View style={styles.headerContainer}>
         <View>
           <Text style={styles.headerSubtitle}>GUARDERÍA BELLA LUNA</Text>
           <Text style={styles.headerTitle}>Tienda</Text>
         </View>
 
-        {/* MODIFICACIÓN: Carrito de compras reubicado en reemplazo de los 3 puntos */}
         <TouchableOpacity style={styles.cartHeaderButton} onPress={() => navigation.navigate('Cart')}>
           <MaterialCommunityIcons name="cart-outline" size={26} color={COLORS.yellow || '#F6AD55'} />
           {cartCount > 0 && (
@@ -74,11 +75,9 @@ export default function ShopScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* CONTENEDOR BLANCO CURVADO */}
       <View style={styles.whiteSheetContainer}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
           
-          {/* BARRA DE BÚSQUEDA OPTIMIZADA AL 100% ANCHO */}
           <View style={styles.searchBarRow}>
             <View style={styles.searchContainer}>
               <MaterialCommunityIcons name="magnify" size={22} color="#A0AEC0" style={styles.searchIcon} />
@@ -92,7 +91,6 @@ export default function ShopScreen({ navigation }) {
             </View>
           </View>
 
-          {/* CUADRÍCULA DE CATEGORÍAS */}
           <View style={styles.gridCategories}>
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
@@ -113,7 +111,6 @@ export default function ShopScreen({ navigation }) {
             })}
           </View>
 
-          {/* SECCIÓN: DESTACADOS */}
           <View style={styles.destacadosHeaderRow}>
             <Text style={styles.sectionTitle}>Destacados</Text>
             {selectedCategory && (
@@ -127,8 +124,11 @@ export default function ShopScreen({ navigation }) {
             <ActivityIndicator size="small" color={COLORS.primary} style={{ marginTop: 20 }} />
           ) : filteredProducts.length > 0 ? (
             filteredProducts.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.productRowCard}>
-                {/* Miniatura Placeholder de color sólido redondeada como el mockup */}
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.productRowCard}
+                onPress={() => addToCart(item)} // ¡Ahora agrega al carrito reactivo al pulsar!
+              >
                 <View style={[styles.productImagePlaceholder, { backgroundColor: item.category === 'alimentos' ? '#FEFCBF' : '#E6FFFA' }]}>
                   <MaterialCommunityIcons 
                     name={item.category === 'alimentos' ? 'bone' : 'pill'} 
@@ -142,7 +142,9 @@ export default function ShopScreen({ navigation }) {
                   <Text style={styles.productSubtext}>{item.subText || item.category}</Text>
                 </View>
 
-                <Text style={styles.productPrice}>{item.price}</Text>
+                <Text style={styles.productPrice}>
+                  {typeof item.price === 'number' ? formatCurrency(item.price) : item.price}
+                </Text>
               </TouchableOpacity>
             ))
           ) : (
@@ -159,8 +161,8 @@ export default function ShopScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#5A344E' }, // Color ciruela oscuro base de la cabecera
-  headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, pt: Platform.OS === 'ios' ? 10 : 20, paddingBottom: 25 },
+  safeArea: { flex: 1, backgroundColor: '#5A344E' },
+  headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: Platform.OS === 'ios' ? 10 : 20, paddingBottom: 25 },
   headerSubtitle: { color: '#E2E8F0', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
   headerTitle: { color: '#F6AD55', fontSize: 28, fontWeight: 'bold', marginTop: 2 },
   cartHeaderButton: { padding: 6, position: 'relative' },

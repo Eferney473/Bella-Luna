@@ -3,7 +3,8 @@ import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import AuthNavigator from './src/navigation/AuthNavigator';
-import { COLORS } from './src/config/colors';
+import { COLORS } from './src/config/colors'; 
+import { CartProvider } from './src/context/CartContext'; // Proveedor Importado
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
@@ -26,8 +27,10 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <AuthNavigator user={user} />
-    </NavigationContainer>
+    <CartProvider> {/* Envolviendo toda la navegación global */}
+      <NavigationContainer>
+        <AuthNavigator user={user} />
+      </NavigationContainer>
+    </CartProvider>
   );
 }

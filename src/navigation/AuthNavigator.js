@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Importaciones corregidas por defecto (Todas cargan perfecto ahora)
 import SplashScreen from '../screens/auth/SplashScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
@@ -14,6 +13,8 @@ import AppointmentsScreen from '../screens/appointments/AppointmentsScreen';
 import StoreScreen from '../screens/store/StoreScreen';
 import AddPetScreen from '../screens/pets/AddPetScreen';
 import BookAppointmentScreen from '../screens/appointments/BookAppointmentScreen';
+import CartScreen from '../screens/store/CartScreen';
+// import PaymentScreen from '../screens/store/PaymentScreen';
 
 import { COLORS } from '../config/colors';
 
@@ -54,19 +55,21 @@ export default function AuthNavigator({ user }) {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        // Flujo Privado de la Aplicación
-        <>
+        // Flujo Privado de la Aplicación sin espacios ocultos entre nodos
+        <Stack.Group>
           <Stack.Screen name="HomeTabs" component={HomeTabs} />
           <Stack.Screen name="AddPet" component={AddPetScreen} />
           <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
-        </>
+          <Stack.Screen name="Cart" component={CartScreen} />
+          {/* <Stack.Screen name="Payment" component={PaymentScreen} /> */}
+        </Stack.Group>
       ) : (
         // Flujo de Autenticación (Público)
-        <>
+        <Stack.Group>
           <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-        </>
+        </Stack.Group>
       )}
     </Stack.Navigator>
   );
