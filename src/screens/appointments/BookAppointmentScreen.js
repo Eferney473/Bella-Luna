@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView, Platform, StatusBar } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import auth from '@react-native-firebase/auth';
@@ -46,7 +46,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
     { id: 's5', name: 'Limpieza de Oídos', desc: 'Higiene preventiva profunda', icon: 'ear-hearing' },
   ];
 
-  // Si cambia el parámetro de navegación y no es edición, actualizamos estados normales
   useEffect(() => {
     if (route.params?.initialService && !route.params?.editingAppointment) {
       setMainService(route.params.initialService);
@@ -71,7 +70,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
         setPets(petsList);
         
         if (petsList.length > 0) {
-          // Si estamos editando, intentamos emparejar la mascota que ya estaba seleccionada originalmente
           if (editingAppointment) {
             const matchPet = petsList.find(p => p.id === editingAppointment.petId);
             setSelectedPet(matchPet || petsList[0]);
@@ -93,7 +91,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
     setSelectedPlan(service === 'Guardería' ? 'Plan Bella Luna' : 'Baño Premium');
   };
 
-  // Manejador del Calendario (Fecha)
   const onDateChange = (event, selectedDate) => {
     setShowDatePicker(Platform.OS === 'ios');
     if (selectedDate) {
@@ -104,7 +101,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
     }
   };
 
-  // Manejador del Reloj (Hora)
   const onTimeChange = (event, selectedTime) => {
     setShowTimePicker(Platform.OS === 'ios');
     if (selectedTime) {
@@ -140,11 +136,9 @@ export default function BookAppointmentScreen({ route, navigation }) {
       };
 
       if (editingAppointment) {
-        // Ejecuta actualización si venimos de la tarjeta del Home en modo edición
         await firestore().collection('appointments').doc(editingAppointment.id).update(appointmentData);
         Alert.alert('¡Cita Actualizada!', `Los cambios para la cita de ${selectedPet.name} fueron guardados.`);
       } else {
-        // Añade una nueva cita en caso regular
         appointmentData.createdAt = firestore.FieldValue.serverTimestamp();
         await firestore().collection('appointments').add(appointmentData);
         Alert.alert('¡Reserva Exitosa!', `Tu cita de ${mainService} (${selectedPlan}) para ${selectedPet.name} ha sido registrada.`);
@@ -162,7 +156,10 @@ export default function BookAppointmentScreen({ route, navigation }) {
   const currentPlans = mainService === 'Guardería' ? daycarePlans : spaPlans;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
+      <StatusBar backgroundColor="#5ECCD3" barStyle="light-content" />
+      
+      {/* HEADER CORREGIDO: Más amplio hacia abajo y a salvo del notch/iconos de estado */}
       <View style={styles.customHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.white} />
@@ -267,11 +264,9 @@ export default function BookAppointmentScreen({ route, navigation }) {
           </View>
         )}
 
-        {/* FECHA Y HORA (CAMPOS CON DATE PICKER INTEGRADO) */}
+        {/* FECHA Y HORA */}
         <Text style={styles.sectionLabel}>Fecha y Hora del Servicio</Text>
         <View style={styles.dateTimeRow}>
-          
-          {/* Selector de Fecha */}
           <TouchableOpacity style={styles.pickerFieldButton} onPress={() => setShowDatePicker(true)}>
             <MaterialCommunityIcons name="calendar" size={20} color={COLORS.primary} style={{ marginRight: 8 }} />
             <Text style={[styles.pickerFieldText, !dateText && { color: '#A0AEC0' }]}>
@@ -279,7 +274,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
             </Text>
           </TouchableOpacity>
 
-          {/* Selector de Hora */}
           <TouchableOpacity style={styles.pickerFieldButton} onPress={() => setShowTimePicker(true)}>
             <MaterialCommunityIcons name="clock-outline" size={20} color={COLORS.primary} style={{ marginRight: 8 }} />
             <Text style={[styles.pickerFieldText, !timeText && { color: '#A0AEC0' }]}>
@@ -288,7 +282,6 @@ export default function BookAppointmentScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Componentes Invisibles/Desplegables del DateTimePicker */}
         {showDatePicker && (
           <DateTimePicker
             value={dateObject}
@@ -309,23 +302,35 @@ export default function BookAppointmentScreen({ route, navigation }) {
           />
         )}
 
-        {/* BOTÓN SIGUIENTE / RESERVAR */}
+        {/* BOTÓN CON CORRECCIÓN DE DISTANCIA AL BORDE DE LA PANTALLA */}
         <TouchableOpacity style={styles.submitBtn} onPress={handleBook} disabled={loading || pets.length === 0}>
           {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.submitBtnText}>{editingAppointment ? "Guardar Cambios" : "Confirmar Reserva"}</Text>}
         </TouchableOpacity>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.background },
-  customHeader: { backgroundColor: '#5ECCD3', paddingVertical: 18, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  
+  /* ESTILOS DEL HEADER OPTIMIZADO */
+  customHeader: { 
+    backgroundColor: '#70C1B3', 
+    paddingTop: Platform.OS === 'ios' ? 55 : 45, // Evita colisión con los iconos del celular
+    paddingBottom: 28, // Mayor amplitud hacia abajo
+    paddingHorizontal: 20, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    borderBottomLeftRadius: 24, 
+    borderBottomRightRadius: 24 
+  },
   backButton: { marginRight: 15 },
-  customHeaderTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.white },
+  customHeaderTitle: { fontSize: 22, fontWeight: 'bold', color: COLORS.white },
+  
   container: { flex: 1 },
-  scrollContainer: { paddingHorizontal: 20, paddingTop: 15, paddingBottom: 40 },
+  scrollContainer: { paddingHorizontal: 20, paddingTop: 15, paddingBottom: 20 },
   sectionLabel: { fontSize: 15, fontWeight: 'bold', color: COLORS.ciruela, marginTop: 18, marginBottom: 12 },
   mainToggleContainer: { flexDirection: 'row', backgroundColor: '#E2E8F0', borderRadius: 12, padding: 4, marginBottom: 5 },
   toggleTab: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 10, borderRadius: 10 },
@@ -355,6 +360,16 @@ const styles = StyleSheet.create({
   dateTimeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   pickerFieldButton: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 14, minHeight: 50, marginRight: 5 },
   pickerFieldText: { fontSize: 13, fontWeight: '500', color: COLORS.textDark },
-  submitBtn: { backgroundColor: COLORS.ciruela, borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 25, elevation: 2 },
+  
+  /* BOTÓN CORREGIDO CON MARGENES DE SEGURIDAD */
+  submitBtn: { 
+    backgroundColor: COLORS.ciruela, 
+    borderRadius: 14, 
+    paddingVertical: 15, 
+    alignItems: 'center', 
+    marginTop: 30, // Separación del último módulo (fecha/hora)
+    marginBottom: 50, // Separa el botón del borde físico inferior de la pantalla
+    elevation: 2 
+  },
   submitBtnText: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' }
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -14,7 +14,6 @@ import StoreScreen from '../screens/store/StoreScreen';
 import AddPetScreen from '../screens/pets/AddPetScreen';
 import BookAppointmentScreen from '../screens/appointments/BookAppointmentScreen';
 import CartScreen from '../screens/store/CartScreen';
-// import PaymentScreen from '../screens/store/PaymentScreen';
 
 import { COLORS } from '../config/colors';
 
@@ -52,21 +51,40 @@ function HomeTabs() {
 }
 
 export default function AuthNavigator({ user }) {
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // Usamos un temporizador simple para el Splash inicial de carga de la app
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 1500); // 1.5 segundos de Splash Screen al abrir la app
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 1. Si la app está abriendo por primera vez, muestra solo el Splash
+  if (isInitializing) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  // 2. Una vez inicializada, conmuta entre Login y Home sin pasar por el Splash
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        // Flujo Privado de la Aplicación sin espacios ocultos entre nodos
+        // Flujo Privado
         <Stack.Group>
           <Stack.Screen name="HomeTabs" component={HomeTabs} />
           <Stack.Screen name="AddPet" component={AddPetScreen} />
           <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
           <Stack.Screen name="Cart" component={CartScreen} />
-          {/* <Stack.Screen name="Payment" component={PaymentScreen} /> */}
         </Stack.Group>
       ) : (
-        // Flujo de Autenticación (Público)
+        // Flujo Público - Al cerrar sesión, el primer elemento en renderizarse es el Login
         <Stack.Group>
-          <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
         </Stack.Group>

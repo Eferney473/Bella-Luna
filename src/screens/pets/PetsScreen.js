@@ -1,6 +1,5 @@
-// src/screens/pets/PetsScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, StatusBar, Platform } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -34,7 +33,6 @@ export default function PetsScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
-  // Función para confirmar si desea eliminar la mascota
   const handleDeletePet = (id, name) => {
     Alert.alert(
       "Eliminar Mascota",
@@ -57,17 +55,33 @@ export default function PetsScreen({ navigation }) {
   };
 
   const renderPetItem = ({ item }) => (
-    // Al presionar la tarjeta, viajamos a AddPet pero pasándole los datos del 'item' como parámetros
     <TouchableOpacity 
       style={styles.petCard} 
       onPress={() => navigation.navigate('AddPet', { pet: item })}
+      activeOpacity={0.85}
     >
-      <View style={styles.petAvatar}>
+      {/* Icono / Avatar con color vibrante similar al ejemplo */}
+      <View style={[styles.petAvatar, { backgroundColor: item.gender === 'Hembra' ? '#FCC419' : COLORS.primary }]}>
         <MaterialCommunityIcons name="paw" size={26} color={COLORS.white} />
       </View>
+      
+      {/* Información de la mascota */}
       <View style={styles.petInfo}>
         <Text style={styles.petName}>{item.name}</Text>
-        <Text style={styles.petDetails}>{item.breed} • {item.age}</Text>
+        <Text style={styles.petDetails}>{item.breed || 'Sin raza'}</Text>
+        
+        {/* Bloques de atributos horizontales */}
+        <View style={styles.badgesRow}>
+          <View style={styles.genderBadge}>
+            <Text style={styles.genderBadgeText}>{item.gender || item.age || 'Mascota'}</Text>
+          </View>
+          {item.weight && (
+            <View style={styles.weightBadge}>
+              <Text style={styles.weightBadgeText}>{item.weight}</Text>
+            </View>
+          )}
+        </View>
+
         {item.notes && item.notes !== 'Ninguna' && (
           <View style={styles.notesBadge}>
             <Text style={styles.notesText} numberOfLines={1}>⚠️ Nota: {item.notes}</Text>
@@ -75,70 +89,136 @@ export default function PetsScreen({ navigation }) {
         )}
       </View>
       
-      {/* Botón sutil para eliminar */}
-      <TouchableOpacity 
-        style={styles.deleteButton} 
-        onPress={() => handleDeletePet(item.id, item.name)}
-      >
-        <MaterialCommunityIcons name="trash-can-outline" size={20} color="#E53E3E" />
-      </TouchableOpacity>
+      {/* Columna Lateral de Acciones (Editar y Borrar) */}
+      <View style={styles.actionColumn}>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('AddPet', { pet: item })}
+        >
+          <MaterialCommunityIcons name="square-edit-outline" size={20} color="#59374F" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.actionButton} 
+          onPress={() => handleDeletePet(item.id, item.name)}
+        >
+          <MaterialCommunityIcons name="trash-can-outline" size={20} color="#E53E3E" />
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* Sincronizamos la StatusBar directamente con el fondo principal superior de la pantalla */}
+      <StatusBar backgroundColor={COLORS.primary || '#4FD1C5'} barStyle="light-content" />
+      
+      {/* CONTENEDOR SUPERIOR DE COLOR COLOR PRIMARY */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mis Mascotas</Text>
-        <Text style={styles.headerSubtitle}>Tus consentidos registrados en Bella Luna</Text>
+        <SafeAreaView>
+          <Text style={styles.headerTitle}>Mis mascotas</Text>
+          <Text style={styles.headerSubtitle}>Tus consentidos registrados en Bella Luna</Text>
+        </SafeAreaView>
       </View>
 
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
-      ) : pets.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="dog-side" size={80} color="#CBD5E0" />
-          <Text style={styles.emptyTitle}>Aún no tienes mascotas</Text>
-          <Text style={styles.emptySubtitle}>Registra a tus peluditos para que puedan agendar planes de Guardería y Spa.</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={pets}
-          keyExtractor={item => item.id}
-          renderItem={renderPetItem}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      {/* CUERPO BLANCO REDONDEADO QUE SE ELEVA */}
+      <View style={styles.bodyContainer}>
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          </View>
+        ) : pets.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons name="dog-side" size={80} color="#CBD5E0" />
+            <Text style={styles.emptyTitle}>Aún no tienes mascotas</Text>
+            <Text style={styles.emptySubtitle}>Registra a tus peluditos para que puedan agendar planes de Guardería y Spa.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={pets}
+            keyExtractor={item => item.id}
+            renderItem={renderPetItem}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
 
+      {/* BOTÓN FLOTANTE ESTILIZADO */}
       <TouchableOpacity 
         style={styles.fabButton} 
-        onPress={() => navigation.navigate('AddPet')} // Va vacío = Modo Crear
+        onPress={() => navigation.navigate('AddPet')}
+        activeOpacity={0.9}
       >
-        <MaterialCommunityIcons name="plus" size={30} color={COLORS.white} />
+        <MaterialCommunityIcons name="plus" size={28} color={COLORS.white} />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },
-  headerTitle: { fontSize: 26, fontWeight: 'bold', color: COLORS.ciruela },
-  headerSubtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4 },
+  container: { flex: 1, backgroundColor: COLORS.primary || '#70C1B3' },
+  
+  /* HEADER COLOR PRIMARY */
+  header: { 
+    paddingHorizontal: 24, 
+    paddingTop: Platform.OS === 'ios' ? 30 : 55, 
+    paddingBottom: 60, // Espacio extra para dar el efecto de fondo cubriente Detrás de la curva
+  },
+  headerTitle: { fontSize: 26, fontWeight: 'bold', color: COLORS.white || '#FFFFFF' },
+  headerSubtitle: { fontSize: 13, color: COLORS.white || '#FFFFFF', marginTop: 3, opacity: 0.9, fontWeight: '500' },
+  
+  /* CONTENEDOR BLANCO CURVADO INTERIOR */
+  bodyContainer: { 
+    flex: 1, 
+    backgroundColor: COLORS.background || '#FAFAFA', 
+    borderTopLeftRadius: 30, 
+    borderTopRightRadius: 30,
+    marginTop: -20, // Provoca que monte sobre el fondo del header de manera suave
+    overflow: 'hidden'
+  },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  listContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 },
-  petCard: { flexDirection: 'row', backgroundColor: COLORS.white, borderRadius: 18, padding: 16, marginBottom: 15, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7', elevation: 1 },
-  petAvatar: { width: 52, height: 52, backgroundColor: COLORS.primary, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  petInfo: { flex: 1, marginLeft: 15, paddingRight: 10 },
-  petName: { fontSize: 16, fontWeight: 'bold', color: COLORS.textDark },
-  petDetails: { fontSize: 13, color: COLORS.textMedium, marginTop: 2 },
-  notesBadge: { backgroundColor: '#FFF5F5', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 6 },
+  listContainer: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 100 },
+  
+  /* TARJETAS CON FONDO CLARO (ESTILO MENTA/CREMA SUTIL) */
+  petCard: { 
+    flexDirection: 'row', 
+    backgroundColor: '#F0F9F6', // Tono sutil claro de fondo tal como se observa en la maqueta
+    borderRadius: 20, 
+    padding: 14, 
+    marginBottom: 16, 
+    alignItems: 'center', 
+    borderWidth: 1, 
+    borderColor: '#E6F4F0',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2
+  },
+  petAvatar: { width: 64, height: 64, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  petInfo: { flex: 1, marginLeft: 14, paddingRight: 4 },
+  petName: { fontSize: 17, fontWeight: 'bold', color: COLORS.textDark || '#2D3748' },
+  petDetails: { fontSize: 12, color: COLORS.textLight || '#718096', marginTop: 1 },
+  
+  /* ATRIBUTOS EN MINI BADGES HORIZONTALES */
+  badgesRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
+  genderBadge: { backgroundColor: '#FAF5FF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+  genderBadgeText: { color: COLORS.ciruela || '#5A344E', fontSize: 11, fontWeight: 'bold' },
+  weightBadge: { backgroundColor: '#EBF8FF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+  weightBadgeText: { color: '#a7b02b', fontSize: 11, fontWeight: 'bold' },
+  
+  notesBadge: { backgroundColor: '#FFF5F5', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 8 },
   notesText: { color: '#E53E3E', fontSize: 11, fontWeight: '600' },
-  deleteButton: { padding: 8 },
+  
+  /* COLUMNA ACCIONES LATERALES */
+  actionColumn: { justifyContent: 'space-around', height: 65, alignItems: 'center', paddingLeft: 6 },
+  actionButton: { padding: 4 },
+  
   emptyContainer: { flex: 0.8, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginTop: 15 },
-  emptySubtitle: { fontSize: 14, color: COLORS.textMedium, textAlign: 'center', marginTop: 8, lineHeight: 20 },
-  fabButton: { position: 'absolute', bottom: 20, right: 20, backgroundColor: COLORS.secondary, width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', elevation: 5 }
+  emptyTitle: { fontSize: 17, fontWeight: 'bold', color: COLORS.textDark, marginTop: 15 },
+  emptySubtitle: { fontSize: 13, color: COLORS.textMedium, textAlign: 'center', marginTop: 8, lineHeight: 19 },
+  
+  /* FAB BUTTON MEJORADO */
+  fabButton: { position: 'absolute', bottom: 25, right: 20, backgroundColor: COLORS.secondary || '#FFC0CB', width: 54, height: 54, borderRadius: 27, justifyContent: 'center', alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3 }
 });

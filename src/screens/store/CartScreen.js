@@ -224,7 +224,7 @@ export default function CartScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#5A344E' },
-  headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 10 : 20, paddingBottom: 25 },
+  headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 30 : 55, paddingBottom: 25 },
   backButton: { padding: 8 },
   headerTitleBlock: { alignItems: 'center', flex: 1 },
   headerTitle: { color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' },
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   totalValue: { fontSize: 16, fontWeight: 'bold', color: '#5A344E' },
   
   footerCheckout: { backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingVertical: 14, borderTopWidth: 1, borderTopColor: '#EDF2F7' },
-  checkoutButton: { backgroundColor: '#5A344E', borderRadius: 16, height: 52, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4 },
+  checkoutButton: { backgroundColor: '#5A344E', borderRadius: 16, height: 52, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4, marginBottom: 50 },
   checkoutButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: 'bold' },
   
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40, paddingTop: 60 },

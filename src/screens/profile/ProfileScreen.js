@@ -1,4 +1,3 @@
-// src/screens/profile/ProfileScreen.js
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert, StatusBar } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -99,11 +98,12 @@ export default function ProfileScreen({ navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
-              // Primero apagamos las lecturas de base de datos
+              // 1. Apagamos las lecturas en tiempo real de Firebase para evitar lecturas nulas
               detenerSuscripcionesManualmente();
               
-              // Luego, cerramos la sesión de forma segura
+              // 2. Ejecutamos el cierre de sesión en Firebase
               await FirebaseService.logoutUser();
+
             } catch (error) {
               console.error("Error al cerrar sesión:", error);
             }
@@ -116,16 +116,16 @@ export default function ProfileScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={COLORS.primary || '#5A344E'} />
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.ciruela} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.ciruela || '#5A344E'} barStyle="light-content" />
       
-      {/* HEADER CURVO CIRUELA (Puntos removidos para evitar botones fantasma) */}
+      {/* HEADER CURVO CIRUELA */}
       <View style={styles.purpleHeaderContainer}>
         <View style={styles.topRow}>
           <Text style={styles.headerTitle}>Mi perfil</Text>
@@ -147,7 +147,7 @@ export default function ProfileScreen({ navigation }) {
       {/* CONTADORES */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={[styles.statNumber, { color: COLORS.ciruela }]}>{totalCitas}</Text>
+          <Text style={[styles.statNumber, { color: COLORS.ciruela || '#5A344E' }]}>{totalCitas}</Text>
           <Text style={styles.statLabel}>Citas totales</Text>
         </View>
 
@@ -190,23 +190,23 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
-  purpleHeaderContainer: { backgroundColor: COLORS.ciruela, paddingHorizontal: 20, paddingTop: 30, paddingBottom: 50, borderBottomLeftRadius: 35, borderBottomRightRadius: 35 },
+  container: { flex: 1, backgroundColor: COLORS.background || '#FAFAFA' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background || '#FAFAFA' },
+  purpleHeaderContainer: { backgroundColor: COLORS.ciruela || '#5A344E', paddingHorizontal: 20, paddingTop: 30, paddingBottom: 50, borderBottomLeftRadius: 35, borderBottomRightRadius: 35 },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: COLORS.white },
-  profileRow: { flexDirection: 'row', alignItems: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: 'bold', color: COLORS.white || '#FFFFFF', marginTop: 30},
+  profileRow: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
   avatarCircle: { width: 75, height: 75, backgroundColor: '#FACC15', borderRadius: 37.5, justifyContent: 'center', alignItems: 'center' },
-  avatarText: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela },
+  avatarText: { fontSize: 24, fontWeight: 'bold', color: COLORS.ciruela || '#5A344E' },
   profileTextContainer: { marginLeft: 16 },
-  profileName: { fontSize: 20, fontWeight: 'bold', color: COLORS.white },
+  profileName: { fontSize: 20, fontWeight: 'bold', color: COLORS.white || '#FFFFFF' },
   profileEmail: { fontSize: 13, color: '#E2E8F0', marginTop: 2 },
   profilePhone: { fontSize: 13, color: '#E2E8F0', marginTop: 1 },
-  statsContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: -35, marginBottom: 25 },
-  statCard: { width: '47%', backgroundColor: COLORS.white, borderRadius: 20, paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+  statsContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: -35, marginBottom: 45 },
+  statCard: { width: '47%', backgroundColor: COLORS.white || '#FFFFFF', borderRadius: 20, paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
   statNumber: { fontSize: 24, fontWeight: 'bold' },
   statLabel: { fontSize: 12, color: '#94A3B8', marginTop: 4, fontWeight: '500' },
-  menuContainer: { backgroundColor: COLORS.white, marginHorizontal: 20, borderRadius: 20, paddingHorizontal: 16, borderWidth: 1, borderColor: '#EDF2F7', elevation: 1 },
+  menuContainer: { backgroundColor: COLORS.white || '#FFFFFF', marginHorizontal: 20, borderRadius: 20, paddingHorizontal: 16, borderWidth: 1, borderColor: '#EDF2F7', elevation: 1 },
   menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   menuItemText: { fontSize: 15, color: '#334155', fontWeight: '500' },
   logoutButtonTextOnly: { alignSelf: 'center', marginTop: 'auto', marginBottom: 35, padding: 10 },
