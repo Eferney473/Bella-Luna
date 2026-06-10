@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, StatusBar, Platform, Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -60,9 +60,13 @@ export default function PetsScreen({ navigation }) {
       onPress={() => navigation.navigate('AddPet', { pet: item })}
       activeOpacity={0.85}
     >
-      {/* Icono / Avatar con color vibrante similar al ejemplo */}
+      {/* Renderizar foto real si existe, sino el icono de la patita */}
       <View style={[styles.petAvatar, { backgroundColor: item.gender === 'Hembra' ? '#FCC419' : COLORS.primary }]}>
-        <MaterialCommunityIcons name="paw" size={26} color={COLORS.white} />
+        {item.photoUri ? (
+          <Image source={{ uri: item.photoUri }} style={styles.avatarImage} />
+        ) : (
+          <MaterialCommunityIcons name="paw" size={26} color={COLORS.white} />
+        )}
       </View>
       
       {/* Información de la mascota */}
@@ -70,12 +74,22 @@ export default function PetsScreen({ navigation }) {
         <Text style={styles.petName}>{item.name}</Text>
         <Text style={styles.petDetails}>{item.breed || 'Sin raza'}</Text>
         
-        {/* Bloques de atributos horizontales */}
+        {/* CORRECCIÓN: Separamos los badges para que carguen independientemente */}
         <View style={styles.badgesRow}>
+          {/* Badge de Género */}
           <View style={styles.genderBadge}>
-            <Text style={styles.genderBadgeText}>{item.gender || item.age || 'Mascota'}</Text>
+            <Text style={styles.genderBadgeText}>{item.gender || 'Mascota'}</Text>
           </View>
-          {item.weight && (
+
+          {/* Badge de Edad independiente */}
+          {item.age && (
+            <View style={styles.ageBadge}>
+              <Text style={styles.ageBadgeText}>{item.age}</Text>
+            </View>
+          )}
+          
+          {/* Badge de Peso */}
+          {item.weight && item.weight !== 'No especificado' && (
             <View style={styles.weightBadge}>
               <Text style={styles.weightBadgeText}>{item.weight}</Text>
             </View>
@@ -89,18 +103,16 @@ export default function PetsScreen({ navigation }) {
         )}
       </View>
       
-      {/* Columna Lateral de Acciones (Editar y Borrar) */}
+      {/* Columna Lateral de Acciones */}
       <View style={styles.actionColumn}>
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('AddPet', { pet: item })}
-        >
+        <View style={styles.actionIconView}>
           <MaterialCommunityIcons name="square-edit-outline" size={20} color="#59374F" />
-        </TouchableOpacity>
+        </View>
         
         <TouchableOpacity 
           style={styles.actionButton} 
           onPress={() => handleDeletePet(item.id, item.name)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialCommunityIcons name="trash-can-outline" size={20} color="#E53E3E" />
         </TouchableOpacity>
@@ -110,10 +122,8 @@ export default function PetsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Sincronizamos la StatusBar directamente con el fondo principal superior de la pantalla */}
       <StatusBar backgroundColor={COLORS.primary || '#4FD1C5'} barStyle="light-content" />
       
-      {/* CONTENEDOR SUPERIOR DE COLOR COLOR PRIMARY */}
       <View style={styles.header}>
         <SafeAreaView>
           <Text style={styles.headerTitle}>Mis mascotas</Text>
@@ -121,7 +131,6 @@ export default function PetsScreen({ navigation }) {
         </SafeAreaView>
       </View>
 
-      {/* CUERPO BLANCO REDONDEADO QUE SE ELEVA */}
       <View style={styles.bodyContainer}>
         {loading ? (
           <View style={styles.center}>
@@ -144,7 +153,6 @@ export default function PetsScreen({ navigation }) {
         )}
       </View>
 
-      {/* BOTÓN FLOTANTE ESTILIZADO */}
       <TouchableOpacity 
         style={styles.fabButton} 
         onPress={() => navigation.navigate('AddPet')}
@@ -158,32 +166,26 @@ export default function PetsScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.primary || '#70C1B3' },
-  
-  /* HEADER COLOR PRIMARY */
   header: { 
     paddingHorizontal: 24, 
     paddingTop: Platform.OS === 'ios' ? 30 : 55, 
-    paddingBottom: 60, // Espacio extra para dar el efecto de fondo cubriente Detrás de la curva
+    paddingBottom: 60,
   },
   headerTitle: { fontSize: 26, fontWeight: 'bold', color: COLORS.white || '#FFFFFF' },
   headerSubtitle: { fontSize: 13, color: COLORS.white || '#FFFFFF', marginTop: 3, opacity: 0.9, fontWeight: '500' },
-  
-  /* CONTENEDOR BLANCO CURVADO INTERIOR */
   bodyContainer: { 
     flex: 1, 
     backgroundColor: COLORS.background || '#FAFAFA', 
     borderTopLeftRadius: 30, 
     borderTopRightRadius: 30,
-    marginTop: -20, // Provoca que monte sobre el fondo del header de manera suave
+    marginTop: -20, 
     overflow: 'hidden'
   },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   listContainer: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 100 },
-  
-  /* TARJETAS CON FONDO CLARO (ESTILO MENTA/CREMA SUTIL) */
   petCard: { 
     flexDirection: 'row', 
-    backgroundColor: '#F0F9F6', // Tono sutil claro de fondo tal como se observa en la maqueta
+    backgroundColor: '#F0F9F6', 
     borderRadius: 20, 
     padding: 14, 
     marginBottom: 16, 
@@ -196,29 +198,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.02,
     shadowRadius: 2
   },
-  petAvatar: { width: 64, height: 64, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  petAvatar: { width: 64, height: 64, borderRadius: 18, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
+  avatarImage: { width: '100%', height: '100%', borderRadius: 18 },
   petInfo: { flex: 1, marginLeft: 14, paddingRight: 4 },
   petName: { fontSize: 17, fontWeight: 'bold', color: COLORS.textDark || '#2D3748' },
   petDetails: { fontSize: 12, color: COLORS.textLight || '#718096', marginTop: 1 },
-  
-  /* ATRIBUTOS EN MINI BADGES HORIZONTALES */
-  badgesRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
+  badgesRow: { flexDirection: 'row', marginTop: 6, gap: 6, flexWrap: 'wrap' },
   genderBadge: { backgroundColor: '#FAF5FF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
   genderBadgeText: { color: COLORS.ciruela || '#5A344E', fontSize: 11, fontWeight: 'bold' },
+  ageBadge: { backgroundColor: '#FEF3C7', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+  ageBadgeText: { color: '#D97706', fontSize: 11, fontWeight: 'bold' },
   weightBadge: { backgroundColor: '#EBF8FF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
   weightBadgeText: { color: '#a7b02b', fontSize: 11, fontWeight: 'bold' },
-  
   notesBadge: { backgroundColor: '#FFF5F5', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 8 },
   notesText: { color: '#E53E3E', fontSize: 11, fontWeight: '600' },
-  
-  /* COLUMNA ACCIONES LATERALES */
   actionColumn: { justifyContent: 'space-around', height: 65, alignItems: 'center', paddingLeft: 6 },
+  actionIconView: { padding: 4, opacity: 0.8 },
   actionButton: { padding: 4 },
-  
   emptyContainer: { flex: 0.8, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
   emptyTitle: { fontSize: 17, fontWeight: 'bold', color: COLORS.textDark, marginTop: 15 },
   emptySubtitle: { fontSize: 13, color: COLORS.textMedium, textAlign: 'center', marginTop: 8, lineHeight: 19 },
-  
-  /* FAB BUTTON MEJORADO */
   fabButton: { position: 'absolute', bottom: 25, right: 20, backgroundColor: COLORS.secondary || '#FFC0CB', width: 54, height: 54, borderRadius: 27, justifyContent: 'center', alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3 }
 });

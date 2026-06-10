@@ -19,11 +19,11 @@ export default function AppointmentsScreen({ navigation }) {
     const currentUser = auth().currentUser;
     if (!currentUser) return;
 
-    // Escuchador en tiempo real de las citas
+    // Escuchador en tiempo real adaptado al índice existente (ownerId + createdAt)
     const unsubscribe = firestore()
       .collection('appointments')
       .where('ownerId', '==', currentUser.uid)
-      .orderBy('dateValue', 'asc') // Lo ideal es ordenar por fecha cronológica de la cita
+      .orderBy('createdAt', 'desc') // Trae las más recientes primero
       .onSnapshot(querySnapshot => {
         const list = [];
         const uniquePets = new Set();
@@ -51,21 +51,18 @@ export default function AppointmentsScreen({ navigation }) {
   useEffect(() => {
     let result = [...appointments];
 
-    // 1. Filtrar por Pestaña (Activas vs Historial)
-    const hoy = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    // 1. Filtrar por Pestaña (Activas vs Historial) de forma estricta según su estado real en la base de datos
     if (activeTab === 'Activas') {
-      // Filtra estados que no sean cancelados/completados o fechas futuras
       result = result.filter(item => item.status !== 'Completada' && item.status !== 'Cancelada');
     } else {
       result = result.filter(item => item.status === 'Completada' || item.status === 'Cancelada');
     }
 
-    // 2. Filtrar por la Pastilla Seleccionada
+    // 2. Filtrar por la Pastilla Seleccionada (Servicios o Nombres de Mascotas)
     if (selectedFilter !== 'Todas') {
       if (selectedFilter === 'Guardería' || selectedFilter === 'Spa') {
         result = result.filter(item => item.service?.toLowerCase().includes(selectedFilter.toLowerCase()));
       } else {
-        // Si no es un servicio, es el nombre de una mascota
         result = result.filter(item => item.petName === selectedFilter);
       }
     }
@@ -73,17 +70,31 @@ export default function AppointmentsScreen({ navigation }) {
     setFilteredAppointments(result);
   }, [appointments, activeTab, selectedFilter]);
 
-  // Función interna para parsear la fecha "18 de mayo" o "18 mayo" a componentes separados
-  const renderDateBlock = (dateString) => {
-    if (!dateString) return { day: '00', month: 'mes' };
-    const cleanDate = dateString.toLowerCase().replace('de', '').trim();
-    const parts = cleanDate.split(' ');
-    const day = parts[0] || '00';
-    const month = parts[1] || 'mes';
-    return { day, month };
+  // Función interna robusta para parsear la fecha a componentes separados
+  const renderDateBlock = (dateField) => {
+    if (!dateField) return { day: '00', month: 'mes' };
+    
+    // Si viene como string descriptivo de Firebase (ej: "18 de mayo")
+    if (typeof dateField === 'string') {
+      const cleanDate = dateField.toLowerCase().replace('de', '').trim();
+      const parts = cleanDate.split(/\s+/);
+      const day = parts[0] || '00';
+      const month = parts[1] ? parts[1].substring(0, 3) : 'mes';
+      return { day, month: month.toUpperCase() };
+    }
+    
+    // Si en un futuro viene como Timestamp nativo de JS/Firebase
+    try {
+      const dateObj = dateField.toDate ? dateField.toDate() : new Date(dateField);
+      const day = dateObj.getDate().toString().padStart(2, '0');
+      const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+      return { day, month: months[dateObj.getMonth()] };
+    } catch (e) {
+      return { day: '00', month: 'MES' };
+    }
   };
 
-  // Badge dinámico según el estado exacto de la cita (Confirmada, Pendiente, etc.)
+  // Badge dinámico según el estado exacto de la cita
   const getStatusStyles = (status) => {
     switch (status) {
       case 'Confirmada':
@@ -92,6 +103,8 @@ export default function AppointmentsScreen({ navigation }) {
         return { bg: '#FEF3E2', text: '#B06000' };
       case 'Cancelada':
         return { bg: '#FCE8E6', text: '#C5221F' };
+      case 'Completada':
+        return { bg: '#E8F0FE', text: '#1A73E8' };
       default:
         return { bg: '#F1F3F4', text: '#5F6368' };
     }
@@ -105,7 +118,7 @@ export default function AppointmentsScreen({ navigation }) {
       <TouchableOpacity 
         style={styles.cardContainer}
         onPress={() => navigation.navigate('AppointmentDetails', { appointment: item })}
-        activeOpacity={0.9}
+        activeOpacity={0.85}
       >
         {/* Bloque de fecha izquierdo */}
         <View style={styles.dateBlock}>
@@ -120,10 +133,10 @@ export default function AppointmentsScreen({ navigation }) {
             {item.subService || (item.service === 'Guardería' ? 'Guardería diurna' : 'Spa canino')}
           </Text>
           
-          {/* Fila con el nombre de la mascota e ícono de huella */}
+          {/* Fila con el nombre de la mascota */}
           <View style={styles.petRow}>
             <MaterialCommunityIcons name="paw" size={14} color={COLORS.oro || '#FCC419'} />
-            <Text style={styles.petNameText}>{item.petName}</Text>
+            <Text style={styles.petNameText}>{item.petName || 'Mascota sin nombre'}</Text>
           </View>
         </View>
 
@@ -132,7 +145,9 @@ export default function AppointmentsScreen({ navigation }) {
           <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
             <Text style={[styles.statusText, { color: statusStyle.text }]}>{item.status || 'Pendiente'}</Text>
           </View>
-          <Text style={styles.priceText}>{item.price ? `$ ${item.price}` : '$ --.--'}</Text>
+          <Text style={styles.priceText}>
+            {item.price ? (item.price.toString().startsWith('$') ? item.price : `$ ${item.price}`) : '$ --.--'}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -149,16 +164,6 @@ export default function AppointmentsScreen({ navigation }) {
           
           <View style={styles.headerTopRow}>
             <Text style={styles.mainTitle}>Mis citas</Text>
-            
-            {/* Botón superior "+ Nueva" */}
-            <TouchableOpacity 
-              style={styles.newAppointmentButton}
-              onPress={() => navigation.navigate('BookAppointment')}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons name="plus" size={18} color={COLORS.ciruela || '#59374F'} style={{ fontWeight: 'bold' }} />
-              <Text style={styles.newAppointmentText}>Nueva</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Selector de pestañas superiores (Activas / Historial) */}
@@ -168,7 +173,7 @@ export default function AppointmentsScreen({ navigation }) {
               onPress={() => { setActiveTab('Activas'); setSelectedFilter('Todas'); }}
             >
               <Text style={[styles.tabButtonText, activeTab === 'Activas' && styles.tabButtonTextActive]}>
-                Activas {appointments.filter(c => c.status !== 'Completada' && c.status !== 'Cancelada').length > 0 ? appointments.filter(c => c.status !== 'Completada' && c.status !== 'Cancelada').length : ''}
+                Activas {appointments.filter(c => c.status !== 'Completada' && c.status !== 'Cancelada').length > 0 ? `(${appointments.filter(c => c.status !== 'Completada' && c.status !== 'Cancelada').length})` : ''}
               </Text>
             </TouchableOpacity>
             
@@ -235,6 +240,15 @@ export default function AppointmentsScreen({ navigation }) {
           />
         )}
       </View>
+
+      {/* BOTÓN FLOTANTE (FAB) PARA NUEVAS CITAS - UNIFICADO CON EL ESTILO DE LA APP */}
+      <TouchableOpacity 
+        style={styles.fabButton} 
+        onPress={() => navigation.navigate('BookAppointment')}
+        activeOpacity={0.9}
+      >
+        <MaterialCommunityIcons name="plus" size={28} color={COLORS.white || '#FFFFFF'} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -265,20 +279,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#FFFFFF',
-  },
-  newAppointmentButton: {
-    flexDirection: 'row',
-    backgroundColor: '#FCC419', // Color Amarillo / Oro de la imagen
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    alignItems: 'center',
-    gap: 4,
-  },
-  newAppointmentText: {
-    color: COLORS.ciruela || '#59374F',
-    fontWeight: 'bold',
-    fontSize: 13,
   },
   
   /* SWITCH DE PASTILLAS (ACTIVAS / HISTORIAL) */
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   appointmentsListContainer: {
     paddingHorizontal: 24,
     paddingTop: 10,
-    paddingBottom: 40,
+    paddingBottom: 100, // Espacio suficiente para no tapar el contenido con el FAB
   },
   cardContainer: {
     backgroundColor: '#FFFFFF',
@@ -357,12 +357,11 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: '#F0F4F8',
-    // Efecto sutil de sombra plana
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 2,
-    elevation: 1,
   },
   dateBlock: {
     width: 50,
@@ -377,9 +376,9 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   dateMonth: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#A0AEC0',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   infoBlock: {
     flex: 1,
@@ -408,9 +407,7 @@ const styles = StyleSheet.create({
   },
   rightBlock: {
     alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: '100%',
-    minHeight: 52,
+    justifyContent: 'center',
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -425,7 +422,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
     color: '#2D3748',
-    marginTop: 8,
+    marginTop: 6,
   },
 
   /* ELEMENTOS VACÍOS O DE CARGA */
@@ -453,4 +450,22 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 18,
   },
+  
+  /* BOTÓN FLOTANTE ESTILIZADO (FAB) */
+  fabButton: { 
+    position: 'absolute', 
+    bottom: 25, 
+    right: 20, 
+    backgroundColor: COLORS.secondary || '#FFC0CB', 
+    width: 54, 
+    height: 54, 
+    borderRadius: 27, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    elevation: 4, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.15, 
+    shadowRadius: 3 
+  }
 });

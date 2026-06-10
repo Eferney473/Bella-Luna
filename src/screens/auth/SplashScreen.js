@@ -1,15 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'; // Usamos la huella de FontAwesome
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { COLORS } from '../../config/colors';
 
 export default function SplashScreen({ navigation }) {
-  useEffect(() => {
-    setTimeout(() => {
-      navigation.replace('Login');
-    }, 2500);
-  }, [navigation]);
-
+  // Removido el setTimeout con navigation.replace para evitar conflictos con el estado global
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />

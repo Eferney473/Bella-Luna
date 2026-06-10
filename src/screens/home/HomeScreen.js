@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity, StatusBar, ActivityIndicator, Dimensions, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, TouchableOpacity, StatusBar, ActivityIndicator, Dimensions, Alert, Platform, Modal } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { COLORS } from '../../config/colors';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   const [userName, setUserName] = useState('Usuario');
   const [appointments, setAppointments] = useState([]);
   const [loadingCitas, setLoadingCitas] = useState(true);
+  
+  // Estados para la galería de fotos en "Más solicitado"
+  const [isGalleryVisible, setIsGalleryVisible] = useState(false);
 
   useEffect(() => {
     const currentUser = auth().currentUser;
@@ -95,15 +98,14 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Sincronizamos la StatusBar con el color real de fondo de la app */}
       <StatusBar backgroundColor={COLORS.background || '#FAFAFA'} barStyle="dark-content" translucent={false} />
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
         
-        {/* TOP BAR REESTRUCTURADA */}
+        {/* TOP BAR */}
         <View style={styles.topBar}>
           <View style={styles.welcomeContainer}>
-            <Text style={styles.greetingLabel}>Bienvenido</Text>
+            <Text style={styles.greetingLabel}>Bienvenid@</Text>
             <Text style={styles.welcomeText}>¡Hola, {userName}!</Text>
           </View>
           
@@ -113,13 +115,13 @@ export default function HomeScreen({ navigation }) {
             resizeMode="contain" 
           />
           
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity style={styles.notificationButton} onPress={() => navigation.navigate('Profile')}>
             <MaterialCommunityIcons name="bell-outline" size={22} color={COLORS.ciruela || '#5A344E'} />
             <View style={styles.activeDot} />
           </TouchableOpacity>
         </View>
 
-        {/* PROMO BANNER ESTILIZADO */}
+        {/* PROMO BANNER */}
         <View style={styles.promoBanner}>
           <View style={styles.promoTextContainer}>
             <Text style={styles.promoTitle}>Ellos se merecen lo mejor</Text>
@@ -137,8 +139,6 @@ export default function HomeScreen({ navigation }) {
         {/* SECCIÓN: NUESTROS SERVICIOS */}
         <Text style={styles.sectionTitle}>Nuestros servicios</Text>
         <View style={styles.gridContainer}>
-          
-          {/* Card: Guardería */}
           <TouchableOpacity 
             style={styles.serviceCard} 
             onPress={() => navigation.navigate('BookAppointment', { initialService: 'Guardería' })}
@@ -150,7 +150,6 @@ export default function HomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
 
-          {/* Card: Spa Canino */}
           <TouchableOpacity 
             style={styles.serviceCard} 
             onPress={() => navigation.navigate('BookAppointment', { initialService: 'Spa' })}
@@ -162,7 +161,6 @@ export default function HomeScreen({ navigation }) {
             </View>
           </TouchableOpacity>
 
-          {/* Card: Ofertas del Mes */}
           <TouchableOpacity 
             style={[styles.serviceCard, styles.ofertasCardSpecial]}
             onPress={() => navigation.navigate('Tienda')}
@@ -177,7 +175,6 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.cardSubtitle}>Descuentos exclusivos</Text>
             </View>
           </TouchableOpacity>
-
         </View>
 
         {/* SECCIÓN DINÁMICA: PRÓXIMAS CITAS */}
@@ -270,90 +267,86 @@ export default function HomeScreen({ navigation }) {
 
         {/* SECCIÓN: MÁS SOLICITADO */}
         <Text style={styles.sectionTitle}>Más solicitado</Text>
-        <View style={styles.masSolicitadoCard}>
+        <TouchableOpacity 
+          style={styles.masSolicitadoCard}
+          onPress={() => setIsGalleryVisible(true)}
+          activeOpacity={0.8}
+        >
           <View style={styles.masSolicitadoRow}>
             <Image source={require('../../assets/paseo2.jpeg')} style={styles.miniPetImage} />
             <View style={styles.masSolicitadoInfo}>
               <Text style={styles.masSolicitadoTitle}>Baño completo</Text>
-              <Text style={styles.masSolicitadoSubtitle}>Spa canino · desde $45.000</Text>
+              <Text style={styles.masSolicitadoSubtitle}>Spa canino · Ver fotos de clientes 📸</Text>
             </View>
             <View style={styles.popularBadge}>
               <Text style={styles.popularText}>Popular</Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
       </ScrollView>
+
+      {/* VISUALIZADOR DE FOTOS (MODAL) */}
+      <Modal visible={isGalleryVisible} transparent={true} animationType="fade">
+        <View style={styles.galleryModalOverlay}>
+          <TouchableOpacity style={styles.closeGalleryButton} onPress={() => setIsGalleryVisible(false)}>
+            <MaterialCommunityIcons name="close-circle" size={36} color="#FFFFFF" />
+          </TouchableOpacity>
+          
+          <Text style={styles.galleryModalTitle}>Resultados Reales de Bella Luna</Text>
+          
+          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={true} style={styles.galleryScroll}>
+            <View style={styles.galleryImageContainer}>
+              <Image source={require('../../assets/baño1.jpeg')} style={styles.galleryLargeImage} resizeMode="contain" />
+              <Text style={styles.galleryImageDesc}>Feliz esperando ver a su dueña</Text>
+            </View>
+            <View style={styles.galleryImageContainer}>
+              <Image source={require('../../assets/baño2.jpeg')} style={styles.galleryLargeImage} resizeMode="contain" />
+              <Text style={styles.galleryImageDesc}>Cuidamos su pelaje con productos premium.</Text>
+            </View>
+            <View style={styles.galleryImageContainer}>
+              <Image source={require('../../assets/baño3.jpeg')} style={styles.galleryLargeImage} resizeMode="contain" />
+              <Text style={styles.galleryImageDesc}>Áreas de recreación seguras y divertidas.</Text>
+            </View>
+          </ScrollView>
+          
+          <Text style={styles.gallerySwipeText}>Swipe para ver más imágenes ➔</Text>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background || '#FAFAFA' },
-  scrollContainer: { paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 30 : 55 },
-  
-  /* TOP BAR REFORMADA */
+  scrollContainer: { paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 30 : 55, paddingBottom: 30 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, height: 50 },
-  welcomeContainer: { flex: 1, justifyContent: 'center',  },
+  welcomeContainer: { flex: 1, justifyContent: 'center' },
   greetingLabel: { fontSize: 11, color: '#A0AEC0', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
   welcomeText: { fontSize: 16, fontWeight: 'bold', color: COLORS.textDark || '#2D3748', marginTop: 1 },
   logoHeader: { width: 110, height: '100%', position: 'absolute', left: '60%', transform: [{ translateX: -55 }] },
   notificationButton: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7', position: 'relative' },
   activeDot: { position: 'absolute', top: 10, right: 11, width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#E53E3E' },
-  
-  /* PROMO BANNER */
   promoBanner: { backgroundColor: COLORS.primary || '#70C1B3', borderRadius: 22, flexDirection: 'row', padding: 18, alignItems: 'center', overflow: 'hidden', marginBottom: 24, minHeight: 115 },
   promoTextContainer: { flex: 1.3, paddingRight: 8 },
   promoTitle: { color: COLORS.white || '#FFFFFF', fontSize: 17, fontWeight: 'bold', lineHeight: 22 },
   promoSubtitle: { color: COLORS.white || '#FFFFFF', fontSize: 11, marginTop: 4, opacity: 0.9 },
   bannerImageWrapper: { flex: 0.7, alignItems: 'flex-end' },
   bannerImage: { width: 85, height: 85, borderRadius: 42.5 },
-  
   sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.ciruela || '#5A344E', marginTop: 4, marginBottom: 14 },
-  
-  /* REJILLA DE SERVICIOS */
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 12 },
-  serviceCard: { 
-    width: '48.5%', 
-    backgroundColor: COLORS.white || '#FFFFFF', 
-    borderRadius: 18, 
-    marginBottom: 14, 
-    borderWidth: 1, 
-    borderColor: '#EDF2F7', 
-    overflow: 'hidden',
-    elevation: 2, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.03, 
-    shadowRadius: 4
-  },
+  serviceCard: { width: '48.5%', backgroundColor: COLORS.white || '#FFFFFF', borderRadius: 18, marginBottom: 14, borderWidth: 1, borderColor: '#EDF2F7', overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 4 },
   ofertasCardSpecial: { borderColor: '#E9D8FD', backgroundColor: '#FAF5FF' },
   cardImage: { width: '100%', height: 105, resizeMode: 'cover' },
   cardInfo: { paddingVertical: 12, paddingHorizontal: 10, alignItems: 'center' },
   cardTitle: { fontSize: 13, fontWeight: 'bold', color: COLORS.textDark || '#2D3748', textAlign: 'center' },
   cardSubtitle: { fontSize: 11, color: COLORS.textLight || '#94A3B8', marginTop: 3, textAlign: 'center' },
-  
   promoBadgeFloating: { position: 'absolute', top: 8, right: 8, backgroundColor: COLORS.ciruela || '#5A344E', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, gap: 2 },
   promoBadgeFloatingText: { color: COLORS.white || '#FFFFFF', fontSize: 9, fontWeight: 'bold' },
-  
   loadingContainer: { padding: 20, alignItems: 'center' },
   citasScrollContainer: { paddingLeft: 2, paddingRight: 16, paddingBottom: 15, marginBottom: 10 },
-  
-  /* TARJETA DE CITA MEJORADA */
-  appointmentCardFull: { 
-    width: width * 0.78, 
-    backgroundColor: '#FDF8F5', 
-    borderRadius: 20, 
-    padding: 16, 
-    marginRight: 14, 
-    borderWidth: 1, 
-    borderColor: '#FAEBE1', 
-    elevation: 3, 
-    shadowColor: '#9C4221', 
-    shadowOffset: { width: 0, height: 3 }, 
-    shadowOpacity: 0.06, 
-    shadowRadius: 5 
-  },
+  appointmentCardFull: { width: width * 0.78, backgroundColor: '#FDF8F5', borderRadius: 20, padding: 16, marginRight: 14, borderWidth: 1, borderColor: '#FAEBE1', elevation: 3, shadowColor: '#9C4221', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.06, shadowRadius: 5 },
   appointmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   tagCitaContainer: { flexDirection: 'row', backgroundColor: COLORS.ciruela || '#5A344E', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, alignItems: 'center' },
   tagCitaText: { color: COLORS.white || '#FFFFFF', fontSize: 10, fontWeight: 'bold', marginLeft: 4 },
@@ -370,29 +363,25 @@ const styles = StyleSheet.create({
   appointmentTime: { fontSize: 12, color: '#4A5568', marginLeft: 4, fontWeight: '500' },
   transportBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   transportBadgeText: { fontSize: 11, fontWeight: '600', marginLeft: 4 },
-  
   emptyAppointmentsCard: { flexDirection: 'row', backgroundColor: '#F8FAFC', borderRadius: 18, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: '#CBD5E1', borderStyle: 'dashed', marginBottom: 12 },
   emptyTitle: { fontSize: 13, fontWeight: 'bold', color: COLORS.textDark || '#2D3748' },
   emptySubtitle: { fontSize: 11, color: COLORS.textLight || '#94A3B8', marginTop: 2 },
-  
-  /* RECOMENDADO CARD */
-  masSolicitadoCard: { 
-    backgroundColor: COLORS.white || '#FFFFFF', 
-    borderRadius: 18, 
-    padding: 14, 
-    borderWidth: 1, 
-    borderColor: '#EDF2F7',
-    elevation: 1, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 1 }, 
-    shadowOpacity: 0.02, 
-    shadowRadius: 2 
-  },
+  masSolicitadoCard: { backgroundColor: COLORS.white || '#FFFFFF', borderRadius: 18, padding: 14, borderWidth: 1, borderColor: '#EDF2F7', elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.02, shadowRadius: 2 },
   masSolicitadoRow: { flexDirection: 'row', alignItems: 'center' },
   miniPetImage: { width: 48, height: 48, borderRadius: 12 },
   masSolicitadoInfo: { flex: 1, marginLeft: 12 },
   masSolicitadoTitle: { fontSize: 14, fontWeight: 'bold', color: COLORS.textDark || '#2D3748' },
   masSolicitadoSubtitle: { fontSize: 12, color: COLORS.textLight || '#94A3B8', marginTop: 1 },
   popularBadge: { backgroundColor: '#F3E8FF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  popularText: { color: '#9333EA', fontSize: 11, fontWeight: 'bold' }
+  popularText: { color: '#9333EA', fontSize: 11, fontWeight: 'bold' },
+  
+  /* ESTILOS DE LA GALERÍA FLOJANTE */
+  galleryModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', alignItems: 'center' },
+  closeGalleryButton: { position: 'absolute', top: 40, right: 25, zIndex: 10 },
+  galleryModalTitle: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold', marginTop: 80, marginBottom: 10 },
+  galleryScroll: { width: width, height: height * 0.6 },
+  galleryImageContainer: { width: width, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 },
+  galleryLargeImage: { width: width - 40, height: height * 0.45, borderRadius: 15 },
+  galleryImageDesc: { color: '#CBD5E1', fontSize: 14, textAlign: 'center', marginTop: 15, paddingHorizontal: 30, fontStyle: 'italic' },
+  gallerySwipeText: { color: '#64748B', fontSize: 12, marginBottom: 40 }
 });

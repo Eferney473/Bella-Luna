@@ -54,39 +54,31 @@ export default function AuthNavigator({ user }) {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // Usamos un temporizador simple para el Splash inicial de carga de la app
     const timer = setTimeout(() => {
       setIsInitializing(false);
-    }, 1500); // 1.5 segundos de Splash Screen al abrir la app
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // 1. Si la app está abriendo por primera vez, muestra solo el Splash
-  if (isInitializing) {
-    return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Splash" component={SplashScreen} />
-      </Stack.Navigator>
-    );
-  }
-
-  // 2. Una vez inicializada, conmuta entre Login y Home sin pasar por el Splash
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
-        // Flujo Privado
+      {isInitializing ? (
+        // 1. Mientras inicializa, el Stack solo conoce a Splash
+        <Stack.Screen name="Splash" component={SplashScreen} />
+      ) : !user ? (
+        // 2. Flujo Público (Login y Registro)
+        <Stack.Group>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+        </Stack.Group>
+      ) : (
+        // 3. Flujo Privado
         <Stack.Group>
           <Stack.Screen name="HomeTabs" component={HomeTabs} />
           <Stack.Screen name="AddPet" component={AddPetScreen} />
           <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
           <Stack.Screen name="Cart" component={CartScreen} />
-        </Stack.Group>
-      ) : (
-        // Flujo Público - Al cerrar sesión, el primer elemento en renderizarse es el Login
-        <Stack.Group>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
         </Stack.Group>
       )}
     </Stack.Navigator>
